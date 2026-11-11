@@ -1258,6 +1258,31 @@
     }
     @media (min-width: 1200px) { .view-catalog .grid { grid-auto-columns:calc(100% / 3); } }
     @media (min-width: 1600px) { .view-catalog .grid { grid-auto-columns:calc(100% / 4); } }
+    /* Reserve a separate, unbreakable count column in the category navigation. */
+    .deck .major-card, .deck .sub-card, .deck .all-card,
+    .deck:not([data-mode="collapsed"]) .all-card {
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) max-content;
+      align-items:center;
+      gap:12px;
+    }
+    .deck .deck-card .name, .deck .sub-card .name {
+      min-width:0;
+      white-space:normal;
+      word-break:keep-all;
+      overflow-wrap:normal;
+    }
+    .deck .deck-card .n, .deck .sub-card .n {
+      min-width:3ch;
+      white-space:nowrap;
+      word-break:normal;
+      overflow-wrap:normal;
+      text-align:right;
+    }
+    .deck .all-card[hidden] { display:none !important; }
+    @media (min-width:900px) {
+      .view-catalog .catalog { grid-template-columns:clamp(280px, 19vw, 360px) minmax(0, 1fr); }
+    }
   </style>
 </head>
 <body class="view-home">
