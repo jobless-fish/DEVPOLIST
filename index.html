@@ -1219,6 +1219,16 @@
     .view-catalog .grid, .view-catalog .deck, .view-home .frame { scrollbar-width:none; -ms-overflow-style:none; }
     .view-catalog .card-scroll .body-block, .view-catalog .card-scroll .user-note:not([hidden]), .view-catalog .card-scroll .comment-panel:not([hidden]), .view-catalog .card-scroll .tag { display:block; }
 
+  
+    .view-catalog .list-wrap { position:relative; }
+    .view-catalog .list-wrap::after {
+      content:""; position:absolute; z-index:2; pointer-events:none;
+      top:0; right:0; bottom:16px; width:48px;
+      -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+      -webkit-mask-image:linear-gradient(to right, transparent, #000);
+      mask-image:linear-gradient(to right, transparent, #000);
+    }
+
   </style>
 </head>
 <body class="view-home">
@@ -1566,6 +1576,17 @@
             if (!textNode.nodeValue.trim() || style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) continue;
             var parentRect = parent.getBoundingClientRect();
             if (parentRect.bottom < 0 || parentRect.top > height || parentRect.right < 0 || parentRect.left > width) continue;
+            // Intersect every clipping ancestor, not just the closest scroller.
+            var bounds = { left:0, top:0, right:width, bottom:height }, ancestor = parent, visible = true;
+            while (ancestor) {
+              var ancestorStyle = getComputedStyle(ancestor);
+              if (ancestor.hidden || ancestorStyle.display === "none" || ancestorStyle.visibility === "hidden" || Number(ancestorStyle.opacity) === 0) { visible = false; break; }
+              var box = ancestor.getBoundingClientRect();
+              if (/^(hidden|clip|auto|scroll)$/.test(ancestorStyle.overflowX)) { bounds.left = Math.max(bounds.left, box.left); bounds.right = Math.min(bounds.right, box.right); }
+              if (/^(hidden|clip|auto|scroll)$/.test(ancestorStyle.overflowY)) { bounds.top = Math.max(bounds.top, box.top); bounds.bottom = Math.min(bounds.bottom, box.bottom); }
+              ancestor = ancestor.parentElement;
+            }
+            if (!visible || bounds.right <= bounds.left || bounds.bottom <= bounds.top) continue;
             ctx.font = style.fontStyle + " " + style.fontWeight + " " + style.fontSize + " " + style.fontFamily;
             ctx.fillStyle = style.color;
             ctx.textBaseline = "middle";
@@ -1575,13 +1596,11 @@
               range.setStart(textNode, i); range.setEnd(textNode, i + 1);
               var rect = range.getBoundingClientRect();
               if (!rect.width || rect.right < 0 || rect.left > width || rect.bottom < 0 || rect.top > height) continue;
-              // Respect clipping by the nearest scrolling container.
-              var clip = parent.closest(".grid, .card-scroll, .deck, .frame");
-              if (clip) {
-                var cr = clip.getBoundingClientRect();
-                if (rect.right < cr.left || rect.left > cr.right || rect.bottom < cr.top || rect.top > cr.bottom) continue;
-              }
+              if (rect.right <= bounds.left || rect.left >= bounds.right || rect.bottom <= bounds.top || rect.top >= bounds.bottom) continue;
+              ctx.save();
+              ctx.beginPath(); ctx.rect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top); ctx.clip();
               ctx.fillText(ch, rect.left, rect.top + rect.height / 2, Math.max(1, rect.width));
+              ctx.restore();
               chars++;
             }
           }
