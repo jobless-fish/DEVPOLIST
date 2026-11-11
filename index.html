@@ -1723,11 +1723,6 @@
 
       function dustTransition(node, apply) {
         if (!canAnimate) { apply(); return; }
-        if (node === grid || node.classList.contains("frame")) {
-          apply();
-          node.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
-          return;
-        }
         if (busy) return;
         busy = true;
         snapAway([node], function () {
@@ -1741,7 +1736,7 @@
       }
       function onMajor(label, btn) {
         if (state.major === label) return;
-        dustTransition(deck, function () {
+        dustTransition(grid, function () {
           state.major = label;
           state.sub = "전체";
           renderDeck();
@@ -1749,7 +1744,7 @@
         });
       }
       document.getElementById("category-back").addEventListener("click", function () {
-        dustTransition(deck, function () {
+        dustTransition(grid, function () {
           state.major = "전체"; state.sub = "전체";
           renderDeck(); renderList();
           document.getElementById("all-card").focus();
@@ -1769,10 +1764,13 @@
 
       allCard.addEventListener("click", function () {
         if (busy) return;
-        state.major = "전체";
-        state.sub = "전체";
-        renderList();
-        renderDeck();
+        if (state.major === "전체" && state.sub === "전체") return;
+        dustTransition(grid, function () {
+          state.major = "전체";
+          state.sub = "전체";
+          renderList();
+          renderDeck();
+        });
       });
 
       andMore.addEventListener("click", function () {
