@@ -1371,10 +1371,6 @@
       var andMore = document.getElementById("and-more");
       var grid = document.getElementById("grid");
 
-      function starEmptyColor() {
-        var s = getComputedStyle(document.documentElement).getPropertyValue("--rule").trim();
-        return s || "#c6ced6";
-      }
 
       function loadNotes() {
         try {
@@ -1418,7 +1414,7 @@
       function starIcon(fill) {
         var wrap = document.createElement("span");
         wrap.className = "star";
-        wrap.appendChild(starSvg(starEmptyColor()));
+        wrap.appendChild(starSvg("var(--rule)"));
         if (fill > 0) {
           var fgWrap = document.createElement("span");
           fgWrap.className = "fg";
@@ -1727,6 +1723,11 @@
 
       function dustTransition(node, apply) {
         if (!canAnimate) { apply(); return; }
+        if (node === grid || node.classList.contains("frame")) {
+          apply();
+          node.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
+          return;
+        }
         if (busy) return;
         busy = true;
         snapAway([node], function () {
@@ -1789,6 +1790,10 @@
         document.body.classList.remove("view-catalog");
         document.body.classList.add("view-home");
         document.getElementById("nav-home").hidden = true;
+        mounted.forEach(rememberCard);
+        mounted.clear();
+        grid.replaceChildren();
+        grid.style.gridTemplateColumns = "";
         renderHomeIndex();
         window.scrollTo(0, 0);
         updateScrollBar();
@@ -1800,6 +1805,7 @@
         document.getElementById("nav-home").hidden = false;
         window.scrollTo(0, 0);
         grid.scrollLeft = 0;
+        renderList();
         updateScrollBar();
         updateBars();
       }
@@ -1811,7 +1817,6 @@
         state.deck = mode;
         updateFavOnly();
         renderDeck();
-        renderList();
         dissolve(showCatalog);
       }
 
@@ -1850,6 +1855,11 @@
         return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
       }
 
+      var searchIndex = new Map(DATA.map(function (r) {
+        return [r.i, normalize([r.name, r.tag, r.d, r.e].join(" "))];
+      }));
+      var nameOrder = new Intl.Collator("ko");
+
       function filtered() {
         var q = normalize(state.q);
         var min = Number(state.min) || 0;
@@ -1859,14 +1869,14 @@
           if (Number(r.s) < min) return false;
           if (state.favOnly && !isFav(r.i)) return false;
           if (!q) return true;
-          return normalize([r.name, r.tag, r.d, r.e, getComment(r.i)].join(" ")).indexOf(q) !== -1;
+          return (searchIndex.get(r.i) + " " + normalize(getComment(r.i))).indexOf(q) !== -1;
         });
         var sort = state.sort;
         rows.sort(function (a, b) {
           if (sort === "stars-desc") return b.s !== a.s ? b.s - a.s : a.i - b.i;
           if (sort === "stars-asc") return a.s !== b.s ? a.s - b.s : a.i - b.i;
           if (sort === "name") {
-            var cmp = String(a.name).localeCompare(String(b.name), "ko");
+            var cmp = nameOrder.compare(a.name, b.name);
             return cmp !== 0 ? cmp : a.i - b.i;
           }
           return a.i - b.i;
@@ -2090,26 +2100,116 @@
         scope.title = scope.textContent;
       }
 
+      // Two cards per column, plus two columns (four cards) on either side.
+      // Only lightweight data survives eviction; detached card DOM is not cached.
+      var listRows = [], mounted = new Map(), cardMemory = new Map();
+      var listFrame = 0, columnWidth = 360, searchTimer = 0;
+
+      function rememberCard(card) {
+        var panel = card.querySelector(".comment-panel");
+        cardMemory.set(Number(card.dataset.i), {
+          top: card.querySelector(".card-scroll").scrollTop,
+          draft: panel.querySelector("textarea").value,
+          open: card.classList.contains("is-editing")
+        });
+      }
+
+      function updateWindow() {
+        listFrame = 0;
+        if (!listRows.length || !document.body.classList.contains("view-catalog") || !grid.clientWidth) return;
+        var columns = Math.ceil(listRows.length / 2);
+        var width = parseFloat(getComputedStyle(grid).gridAutoColumns) || 360;
+        if (width !== columnWidth || !grid.style.gridTemplateColumns) {
+          columnWidth = width;
+          grid.style.gridTemplateColumns = "repeat(" + columns + ", " + width + "px)";
+        }
+        var first = Math.max(0, Math.floor(grid.scrollLeft / width) - 2) * 2;
+        var end = Math.min(listRows.length, (Math.ceil((grid.scrollLeft + grid.clientWidth) / width) + 2) * 2);
+        mounted.forEach(function (card, index) {
+          if ((index < first || index >= end) && !card.contains(document.activeElement)) {
+            rememberCard(card);
+            card.remove();
+            mounted.delete(index);
+          }
+        });
+        for (var i = first; i < end; i++) {
+          if (mounted.has(i)) continue;
+          var row = listRows[i], card = renderCard(row, i + 1);
+          card.style.gridColumn = String(Math.floor(i / 2) + 1);
+          card.style.gridRow = String(i % 2 + 1);
+          var next = Array.from(grid.children).find(function (n) { return Number(n.dataset.pos) > i + 1; });
+          grid.insertBefore(card, next || null);
+          mounted.set(i, card);
+          var memory = cardMemory.get(row.i);
+          if (memory) {
+            card.querySelector("textarea").value = memory.draft;
+            var panel = card.querySelector(".comment-panel");
+            card.classList.toggle("is-editing", memory.open);
+            panel.hidden = !memory.open;
+            panel.classList.toggle("is-open", memory.open);
+            card.querySelector(".card-scroll").scrollTop = memory.top;
+          }
+        }
+      }
+
+      function scheduleWindow() {
+        if (!listFrame) listFrame = requestAnimationFrame(updateWindow);
+      }
+      grid.addEventListener("scroll", scheduleWindow, { passive: true });
+      grid.addEventListener("focusout", scheduleWindow);
+      if (typeof ResizeObserver !== "undefined") new ResizeObserver(scheduleWindow).observe(grid);
+      else window.addEventListener("resize", scheduleWindow);
+
+      function cardControls(card) {
+        return Array.from(card.querySelectorAll("a, button, textarea")).filter(function (n) {
+          return n.getClientRects().length && !n.disabled && (!card.classList.contains("is-editing") || n.closest(".comment-panel"));
+        });
+      }
+
+      // Keep tab order continuous across cards that have not yet been mounted.
+      grid.addEventListener("keydown", function (ev) {
+        if (ev.key !== "Tab") return;
+        var card = ev.target.closest(".card");
+        if (!card) return;
+        var controls = cardControls(card);
+        if (ev.target !== controls[ev.shiftKey ? 0 : controls.length - 1]) return;
+        var index = Number(card.dataset.pos) - 1 + (ev.shiftKey ? -1 : 1);
+        if (index < 0 || index >= listRows.length) return;
+        ev.preventDefault();
+        grid.scrollLeft = Math.floor(index / 2) * columnWidth;
+        updateWindow();
+        var nextControls = cardControls(mounted.get(index));
+        nextControls[ev.shiftKey ? nextControls.length - 1 : 0].focus({ preventScroll: true });
+      });
+
       function renderList(keepScroll) {
         hideCommentTip();
-        var rows = filtered();
         var prev = grid.scrollLeft;
-        grid.textContent = "";
-        renderStatus(rows.length);
-        if (!rows.length) {
+        mounted.forEach(rememberCard);
+        mounted.clear();
+        listRows = filtered();
+        grid.replaceChildren();
+        grid.style.gridTemplateColumns = "";
+        renderStatus(listRows.length);
+        if (!listRows.length) {
           grid.appendChild(el("div", "empty", state.favOnly && !favCount() ? "아직 즐겨찾기한 포트폴리오가 없습니다." : "조건에 맞는 포트폴리오가 없습니다."));
         } else {
-          var frag = document.createDocumentFragment();
-          rows.forEach(function (row, k) { frag.appendChild(renderCard(row, k + 1)); });
-          grid.appendChild(frag);
+          var spacer = el("div", "virtual-spacer");
+          spacer.setAttribute("aria-hidden", "true");
+          spacer.style.cssText = "grid-column:1 / -1;grid-row:1 / 3;pointer-events:none;visibility:hidden;min-width:0";
+          grid.appendChild(spacer);
+          columnWidth = parseFloat(getComputedStyle(grid).gridAutoColumns) || 360;
+          grid.style.gridTemplateColumns = "repeat(" + Math.ceil(listRows.length / 2) + ", " + columnWidth + "px)";
         }
         grid.scrollLeft = keepScroll ? prev : 0;
+        updateWindow();
         updateBars();
       }
 
       document.getElementById("q").addEventListener("input", function (ev) {
         state.q = ev.target.value;
-        renderList();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(renderList, 120);
       });
       document.getElementById("sort").addEventListener("change", function (ev) {
         state.sort = ev.target.value;
@@ -2164,7 +2264,6 @@
       updateFavOnly();
       renderHomeIndex();
       renderDeck();
-      renderList();
       updateScrollBar();
     })();
   </script>
