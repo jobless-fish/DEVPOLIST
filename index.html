@@ -1229,6 +1229,21 @@
       mask-image:linear-gradient(to right, transparent, #000);
     }
 
+  
+    .view-catalog .card { position:relative; perspective:1000px; }
+    .view-catalog .card > .card-top, .view-catalog .card > .card-scroll, .view-catalog .card > .card-tools { transition:opacity .22s ease, transform .35s ease; transform-origin:center; backface-visibility:hidden; }
+    .view-catalog .card.is-editing > .card-top, .view-catalog .card.is-editing > .card-scroll, .view-catalog .card.is-editing > .card-tools { opacity:0; transform:rotateY(-85deg); pointer-events:none; }
+    .view-catalog .card > .comment-panel { position:absolute; inset:0; z-index:4; padding:10px 14px; background:var(--paper); display:flex; flex-direction:column; gap:5px; transform:rotateY(85deg); transform-origin:center; backface-visibility:hidden; transition:opacity .3s ease, transform .4s ease; }
+    .view-catalog .card > .comment-panel[hidden] { display:none; }
+    .view-catalog .card > .comment-panel.is-open { opacity:1; transform:rotateY(0); }
+    .view-catalog .comment-panel textarea { flex:1 1 auto; min-height:30px; height:100%; resize:none; padding:8px; }
+    .comment-hint { margin:0; color:var(--slate); font-size:.7rem; line-height:1.2; }
+    .view-catalog .comment-actions { flex:0 0 auto; margin:0; gap:5px; }
+    .view-catalog .comment-actions .tool-btn { min-height:28px; padding:4px 9px; font-size:.78rem; }
+    .comment-tooltip { position:fixed; z-index:200; pointer-events:none; max-width:min(280px, calc(100vw - 16px)); max-height:min(35vh, 240px); overflow:hidden; padding:11px 14px; border:1px solid var(--rule); border-radius:8px; background:var(--paper); color:var(--ink); box-shadow:0 6px 24px rgba(20,30,45,.16); white-space:pre-wrap; overflow-wrap:anywhere; font:400 .85rem/1.5 var(--text); }
+    .comment-tooltip[hidden] { display:none; }
+    @media (prefers-reduced-motion:reduce) { .view-catalog .card > .comment-panel, .view-catalog .card > .card-top, .view-catalog .card > .card-scroll, .view-catalog .card > .card-tools { transition:none; } }
+
   </style>
 </head>
 <body class="view-home">
@@ -1861,6 +1876,7 @@
 
       function openCommentPanel(panel) {
         panel.hidden = false;
+        panel.closest(".card").classList.add("is-editing");
         panel.classList.remove("is-open");
         var ta = panel.querySelector("textarea");
         if (reduceMotion) {
@@ -1878,6 +1894,7 @@
 
       function closeCommentPanel(panel) {
         panel.classList.remove("is-open");
+        panel.closest(".card").classList.remove("is-editing");
         if (reduceMotion) {
           panel.hidden = true;
           return;
@@ -1886,6 +1903,21 @@
           if (!panel.classList.contains("is-open")) panel.hidden = true;
         }, FADE_MS);
       }
+
+      var commentTip = el("div", "comment-tooltip");
+      commentTip.hidden = true;
+      commentTip.setAttribute("aria-hidden", "true");
+      document.body.appendChild(commentTip);
+      function hideCommentTip() { commentTip.hidden = true; }
+      function showCommentTip(text, x, y) {
+        commentTip.textContent = text;
+        commentTip.hidden = false;
+        var rect = commentTip.getBoundingClientRect();
+        commentTip.style.left = Math.max(8, Math.min(x + 18, window.innerWidth - rect.width - 8)) + "px";
+        commentTip.style.top = Math.max(8, Math.min(y + 18, window.innerHeight - rect.height - 8)) + "px";
+      }
+      grid.addEventListener("scroll", hideCommentTip, { passive:true });
+      window.addEventListener("blur", hideCommentTip);
 
       function renderCard(row, pos) {
         var card = el("article", "card");
@@ -1943,6 +1975,7 @@
         ta.setAttribute("aria-label", "코멘트");
         ta.value = existing;
         panel.appendChild(ta);
+        panel.appendChild(el("p", "comment-hint", "Enter 저장 · Shift+Enter 줄바꿈"));
         var actions = el("div", "comment-actions");
         var saveBtn = el("button", "tool-btn comment-save", "저장");
         saveBtn.type = "button";
@@ -1954,8 +1987,8 @@
         actions.appendChild(clearBtn);
         actions.appendChild(cancelBtn);
         panel.appendChild(actions);
-        scroll.appendChild(panel);
         card.appendChild(scroll);
+        card.appendChild(panel);
 
         var tools = el("div", "card-tools");
         var favBtn = el("button", "tool-btn fav-btn");
@@ -1985,6 +2018,14 @@
         commentBtn.type = "button";
         tools.appendChild(commentBtn);
         card.appendChild(tools);
+        card.addEventListener("pointermove", function (event) {
+          if (event.pointerType !== "mouse" || card.classList.contains("is-editing")) { hideCommentTip(); return; }
+          var text = getComment(row.i);
+          if (!text) { hideCommentTip(); return; }
+          showCommentTip(text, event.clientX, event.clientY);
+        });
+        card.addEventListener("pointerleave", hideCommentTip);
+        card.addEventListener("pointerdown", hideCommentTip);
         function refreshNote() {
           var text = getComment(row.i);
           noteEl.textContent = "";
@@ -2001,6 +2042,12 @@
             openCommentPanel(panel);
           } else {
             closeCommentPanel(panel);
+          }
+        });
+        ta.addEventListener("keydown", function (event) {
+          if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+            event.preventDefault();
+            saveBtn.click();
           }
         });
         saveBtn.addEventListener("click", function () {
@@ -2044,6 +2091,7 @@
       }
 
       function renderList(keepScroll) {
+        hideCommentTip();
         var rows = filtered();
         var prev = grid.scrollLeft;
         grid.textContent = "";
