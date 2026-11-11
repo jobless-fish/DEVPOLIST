@@ -1601,10 +1601,10 @@
         var paint = layer.getContext("2d"), start = performance.now();
         nodes.forEach(function (node) {
           node.style.pointerEvents = "none";
-          node.animate([{opacity:1}, {opacity:0}], {duration:260, easing:"ease-out", fill:"forwards"});
+          node.animate([{opacity:1}, {opacity:0}], {duration:520, easing:"ease-out", fill:"forwards"});
         });
         function draw(now) {
-          var t = (now - start) / 1000;
+          var t = (now - start) / 2000;
           paint.clearRect(0, 0, width, height);
           particles.forEach(function (p) {
             var age = Math.max(0, t - p.delay);
@@ -1616,7 +1616,7 @@
           else layer.remove();
         }
         requestAnimationFrame(draw);
-        window.setTimeout(done, 480);
+        window.setTimeout(done, 960);
       }
 
       /* —— Deck —— */
@@ -1699,7 +1699,7 @@
           node.getAnimations().forEach(function (animation) { animation.cancel(); });
           node.style.pointerEvents = "";
           apply();
-          var reveal = node.animate([{ opacity: 0, filter: "blur(2px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 700, easing: "ease-in-out" });
+          var reveal = node.animate([{ opacity: 0, filter: "blur(2px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 1400, easing: "ease-in-out" });
           reveal.onfinish = function () { busy = false; };
           reveal.oncancel = function () { busy = false; };
         });
