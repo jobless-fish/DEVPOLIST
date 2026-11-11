@@ -1550,43 +1550,73 @@
         });
       }
 
-      var DUST_COLORS = ["#1c2531", "#55616e", "#aeb8c2", "#c6ced6", "#2747c0"];
       function snapAway(nodes, done) {
-        if (!canAnimate || !nodes.length) {
-          done();
-          return;
-        }
-        var layer = el("div", "dust-layer");
-        layer.setAttribute("aria-hidden", "true");
-        document.body.appendChild(layer);
-        nodes.forEach(function (card, ci) {
-          var r = card.getBoundingClientRect();
-          var lag = ci * 40;
-          var count = 120;
-          for (var k = 0; k < count; k++) {
-            var p = el("span", "dust");
-            var size = 0.5 + Math.random() * 1.7;
-            p.style.width = size + "px";
-            p.style.height = size + "px";
-            p.style.left = (r.left + Math.random() * r.width) + "px";
-            p.style.top = (r.top + Math.random() * r.height) + "px";
-            p.style.background = DUST_COLORS[(Math.random() * DUST_COLORS.length) | 0];
-            layer.appendChild(p);
-            var tx = -(18 + Math.random() * 120);
-            var ty = -20 - Math.random() * 100 + (Math.random() - 0.5) * 35;
-            p.animate([
-              { transform: "translate(0,0) rotate(0deg)", opacity: 0.35 + Math.random() * 0.5 },
-              { transform: "translate(" + tx + "px," + ty + "px) rotate(" + ((Math.random() * 240) - 120) + "deg)", opacity: 0 }
-            ], { duration: 850 + Math.random() * 850, delay: lag + Math.random() * 260, easing: "cubic-bezier(.25,.6,.3,1)", fill: "both" });
+        if (!canAnimate || !nodes.length) { done(); return; }
+        var width = window.innerWidth, height = window.innerHeight;
+        var mask = document.createElement("canvas");
+        mask.width = width; mask.height = height;
+        var ctx = mask.getContext("2d", { willReadFrequently: true });
+        if (!ctx) { done(); return; }
+        var range = document.createRange(), chars = 0;
+        nodes.forEach(function (node) {
+          var walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+          var textNode;
+          while ((textNode = walker.nextNode()) && chars < 3000) {
+            var parent = textNode.parentElement, style = getComputedStyle(parent);
+            if (!textNode.nodeValue.trim() || style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) continue;
+            var parentRect = parent.getBoundingClientRect();
+            if (parentRect.bottom < 0 || parentRect.top > height || parentRect.right < 0 || parentRect.left > width) continue;
+            ctx.font = style.fontStyle + " " + style.fontWeight + " " + style.fontSize + " " + style.fontFamily;
+            ctx.fillStyle = style.color;
+            ctx.textBaseline = "middle";
+            for (var i = 0; i < textNode.length && chars < 3000; i++) {
+              var ch = textNode.nodeValue.charAt(i);
+              if (/\s/.test(ch)) continue;
+              range.setStart(textNode, i); range.setEnd(textNode, i + 1);
+              var rect = range.getBoundingClientRect();
+              if (!rect.width || rect.right < 0 || rect.left > width || rect.bottom < 0 || rect.top > height) continue;
+              // Respect clipping by the nearest scrolling container.
+              var clip = parent.closest(".grid, .card-scroll, .deck, .frame");
+              if (clip) {
+                var cr = clip.getBoundingClientRect();
+                if (rect.right < cr.left || rect.left > cr.right || rect.bottom < cr.top || rect.top > cr.bottom) continue;
+              }
+              ctx.fillText(ch, rect.left, rect.top + rect.height / 2, Math.max(1, rect.width));
+              chars++;
+            }
           }
-          card.style.pointerEvents = "none";
-          card.animate([
-            { opacity: 1, filter: "blur(0)", transform: "none" },
-            { opacity: 0, filter: "blur(3px)", transform: "translate(-12px,-9px)" }
-          ], { duration: 520, delay: lag, easing: "ease-out", fill: "forwards" });
         });
-        window.setTimeout(done, 560 + nodes.length * 40);
-        window.setTimeout(function () { if (layer.parentNode) layer.parentNode.removeChild(layer); }, 1900 + nodes.length * 40);
+        var pixels = ctx.getImageData(0, 0, width, height).data, particles = [];
+        for (var y = 0; y < height; y += 2) {
+          for (var x = 0; x < width; x += 2) {
+            var idx = (y * width + x) * 4;
+            if (pixels[idx + 3] < 70) continue;
+            particles.push({ x:x, y:y, color:"rgb(" + pixels[idx] + "," + pixels[idx+1] + "," + pixels[idx+2] + ")", vx:(Math.random()-.7)*90, vy:-20-Math.random()*90, delay:Math.random()*.28, size:.55+Math.random()*1.3 });
+          }
+        }
+        if (particles.length > 16000) particles = particles.filter(function (_, i) { return i % Math.ceil(particles.length / 16000) === 0; });
+        var layer = document.createElement("canvas");
+        layer.className = "dust-layer"; layer.width = width; layer.height = height;
+        layer.setAttribute("aria-hidden", "true"); document.body.appendChild(layer);
+        var paint = layer.getContext("2d"), start = performance.now();
+        nodes.forEach(function (node) {
+          node.style.pointerEvents = "none";
+          node.animate([{opacity:1}, {opacity:0}], {duration:260, easing:"ease-out", fill:"forwards"});
+        });
+        function draw(now) {
+          var t = (now - start) / 1000;
+          paint.clearRect(0, 0, width, height);
+          particles.forEach(function (p) {
+            var age = Math.max(0, t - p.delay);
+            paint.globalAlpha = Math.max(0, 1 - age / 1.05);
+            paint.fillStyle = p.color;
+            paint.fillRect(p.x + p.vx * age, p.y + p.vy * age + 30 * age * age, p.size, p.size);
+          });
+          if (t < 1.4) requestAnimationFrame(draw);
+          else layer.remove();
+        }
+        requestAnimationFrame(draw);
+        window.setTimeout(done, 380);
       }
 
       /* —— Deck —— */
