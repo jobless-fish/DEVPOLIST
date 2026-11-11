@@ -1616,7 +1616,7 @@
           else layer.remove();
         }
         requestAnimationFrame(draw);
-        window.setTimeout(done, 380);
+        window.setTimeout(done, 480);
       }
 
       /* —— Deck —— */
@@ -1699,8 +1699,9 @@
           node.getAnimations().forEach(function (animation) { animation.cancel(); });
           node.style.pointerEvents = "";
           apply();
-          busy = false;
-          node.animate([{ opacity: 0, filter: "blur(2px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 300, easing: "ease-out" });
+          var reveal = node.animate([{ opacity: 0, filter: "blur(2px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 700, easing: "ease-in-out" });
+          reveal.onfinish = function () { busy = false; };
+          reveal.oncancel = function () { busy = false; };
         });
       }
       function onMajor(label, btn) {
