@@ -1587,14 +1587,14 @@
           }
         });
         var pixels = ctx.getImageData(0, 0, width, height).data, particles = [];
-        for (var y = 0; y < height; y += 2) {
-          for (var x = 0; x < width; x += 2) {
+        for (var y = 0; y < height; y += 1) {
+          for (var x = 0; x < width; x += 1) {
             var idx = (y * width + x) * 4;
             if (pixels[idx + 3] < 70) continue;
-            particles.push({ x:x, y:y, color:"rgb(" + pixels[idx] + "," + pixels[idx+1] + "," + pixels[idx+2] + ")", vx:(Math.random()-.7)*90, vy:-20-Math.random()*90, delay:Math.random()*.28, size:.55+Math.random()*1.3 });
+            particles.push({ x:x, y:y, color:"rgb(" + pixels[idx] + "," + pixels[idx+1] + "," + pixels[idx+2] + ")", vx:(Math.random()-.65)*360, vy:-80-Math.random()*300, delay:Math.random()*.12, size:.3+Math.random()*.55 });
           }
         }
-        if (particles.length > 16000) particles = particles.filter(function (_, i) { return i % Math.ceil(particles.length / 16000) === 0; });
+        if (particles.length > 48000) particles = particles.filter(function (_, i) { return i % Math.ceil(particles.length / 48000) === 0; });
         var layer = document.createElement("canvas");
         layer.className = "dust-layer"; layer.width = width; layer.height = height;
         layer.setAttribute("aria-hidden", "true"); document.body.appendChild(layer);
@@ -1608,11 +1608,11 @@
           paint.clearRect(0, 0, width, height);
           particles.forEach(function (p) {
             var age = Math.max(0, t - p.delay);
-            paint.globalAlpha = Math.max(0, 1 - age / 1.05);
+            paint.globalAlpha = Math.max(0, 1 - age / .9);
             paint.fillStyle = p.color;
-            paint.fillRect(p.x + p.vx * age, p.y + p.vy * age + 30 * age * age, p.size, p.size);
+            paint.fillRect(p.x + p.vx * age, p.y + p.vy * age + 18 * age * age, p.size, p.size);
           });
-          if (t < 1.4) requestAnimationFrame(draw);
+          if (t < 1.1) requestAnimationFrame(draw);
           else layer.remove();
         }
         requestAnimationFrame(draw);
