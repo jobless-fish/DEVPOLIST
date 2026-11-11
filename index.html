@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>DEVPOLIST</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css">
   <style>
     /* fonts:start */
     /* IBM Plex Sans KR and IBM Plex Mono, (c) 2017 IBM Corp., SIL Open Font License 1.1 (https://openfontlicense.org). Modified (subset) and renamed DP Sans / DP Mono per the Reserved Font Name clause. */
@@ -43,9 +44,9 @@
       --star-empty: var(--rule);
       --accent: var(--ledger);
       --field: #f6f8f9;
-      --sans: "DP Sans", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Nanum Gothic", sans-serif;
+      --sans: "Paperlogy", "DP Sans", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Nanum Gothic", sans-serif;
       --mono: "DP Mono", "DP Sans", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-      --text: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Nanum Gothic", "DP Sans", sans-serif;
+      --text: "Paperlogy", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Nanum Gothic", "DP Sans", sans-serif;
       --radius: 4px;
       --fade: 0.32s ease;
     }
@@ -950,7 +951,7 @@
     }
     .dust {
       position: absolute;
-      border-radius: 1px;
+      border-radius: 50%;
       will-change: transform, opacity;
     }
     @media (max-width: 860px) {
@@ -1069,6 +1070,155 @@
       .and-more svg { transition: none; }
       .grid { scroll-snap-type: none; }
     }
+  
+
+    .category-title { margin: 0 0 10px; font-size: 1rem; font-weight: 700; }
+    .deck .deck-board, .deck[data-mode="majors"] .deck-board, .deck[data-mode="subs"] .deck-board { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+    .deck .all-card, .deck:not([data-mode="collapsed"]) .all-card { flex:0 0 auto; min-height:44px; padding:10px 14px; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
+    .deck .all-card .name, .deck:not([data-mode="collapsed"]) .all-card .name { font-family:var(--text); font-size:0.95rem; letter-spacing:0; line-height:1.2; }
+    #major-lane { flex:1 1 700px; }
+    .deck .major-cards, .deck[data-mode="subs"] .major-cards { display:flex; flex-wrap:wrap; height:auto; overflow:visible; gap:8px; }
+    .deck .major-card { min-height:44px; padding:10px 14px; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
+    .deck .major-card .name { font-size:0.95rem; }
+    #sub-lane { flex:1 0 100%; border-top:1px solid var(--rule); padding-top:12px; margin-top:4px; }
+    .sub-cards { flex-wrap:wrap; height:auto; overflow:visible; }
+    .sub-card { min-height:40px; padding:9px 13px; font-size:0.9rem; }
+    .deck .and-more, #major-lane > .hbar, #sub-lane > .hbar { display:none !important; }
+
+    /* A vertically browsable directory */
+    body.view-catalog { height:auto; overflow:auto; }
+    .view-catalog .frame { height:auto; min-height:100vh; }
+    .view-catalog .catalog { flex:none; }
+    .view-catalog .list-wrap { display:block; }
+    .view-catalog .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%, 320px),1fr)); overflow:visible; border-bottom:0; gap:0; }
+    .view-catalog .card, .view-catalog .card:first-child { height:auto; min-height:300px; padding:20px; border:0; border-bottom:1px solid var(--rule); border-right:1px solid var(--rule); }
+    .view-catalog .card-scroll { overflow:visible; }
+    .view-catalog .grid + .hbar { display:none; }
+    @media (max-width:700px) { .view-catalog .grid { grid-template-columns:1fr; } .view-catalog .card { min-height:0; } }
+
+  
+    /* Category navigation follows the hierarchy of the directory. */
+    .category-title { font-size:1rem; font-weight:700; }
+    .deck .deck-board, .deck[data-mode="majors"] .deck-board, .deck[data-mode="subs"] .deck-board { display:flex; flex-direction:column; gap:3px; }
+    .deck .all-card, .deck:not([data-mode="collapsed"]) .all-card, .deck .major-card { width:100%; min-height:42px; padding:10px 12px; border-color:transparent; border-radius:5px; justify-content:space-between; }
+    .deck .all-card .name, .deck:not([data-mode="collapsed"]) .all-card .name, .deck .major-card .name { font-size:.95rem; font-weight:600; }
+    #major-lane { flex:none; width:100%; }
+    .deck .major-cards, .deck[data-mode="subs"] .major-cards { display:flex; flex-direction:column; gap:3px; }
+    #sub-lane { flex:none; width:auto; margin:0 0 5px 18px; padding:2px 0 2px 10px; border-top:0; border-left:1px solid var(--rule); }
+    .sub-cards { display:flex; flex-direction:column; align-items:stretch; gap:2px; }
+    .sub-card { width:100%; min-height:38px; padding:8px 10px; border-color:transparent; justify-content:space-between; white-space:normal; text-align:left; font-weight:400; }
+    .sub-card[aria-pressed="true"] { font-weight:500; }
+    @media (min-width:900px) {
+      .view-catalog .catalog { display:grid; grid-template-columns:220px minmax(0,1fr); grid-template-rows:auto 1fr; column-gap:28px; align-items:start; }
+      .view-catalog .deck { grid-column:1; grid-row:1 / span 2; position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; }
+      .view-catalog .toolbar { grid-column:2; grid-row:1; }
+      .view-catalog .list-wrap { grid-column:2; grid-row:2; min-width:0; }
+    }
+    @media (max-width:899px) {
+      .deck .major-cards, .deck[data-mode="subs"] .major-cards { display:flex; flex-direction:row; flex-wrap:wrap; }
+      #major-lane { width:100%; }
+      .deck .major-card { width:auto; }
+      #sub-lane { flex:1 0 100%; margin:2px 0 8px 12px; }
+      .sub-cards { flex-direction:row; flex-wrap:wrap; }
+      .sub-card { width:auto; }
+    }
+
+  
+    #category-back { cursor:pointer; align-self:flex-start; padding:8px 10px; font:500 .9rem var(--text); color:var(--slate); }
+    #category-back[hidden], .deck .all-card[hidden] { display:none; }
+    .deck[data-mode="subs"] .major-card { pointer-events:none; background:transparent; color:var(--ink); border:0; }
+    .deck[data-mode="subs"] .major-card .n { color:var(--slate); }
+    .deck .sub-card .name { font-size:.9rem; font-weight:400; }
+    .deck .sub-card[aria-pressed="true"] .name { font-weight:500; }
+    .view-catalog .grid { display:flex; flex-direction:row; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity; border-bottom:1px solid var(--rule); }
+    .view-catalog .card, .view-catalog .card:first-child { flex:0 0 22.5rem; min-height:360px; border-bottom:0; scroll-snap-align:start; }
+    .view-catalog .grid + .hbar { display:block; }
+    @media (max-width:700px) { .view-catalog .card, .view-catalog .card:first-child { flex-basis:calc(100vw - 64px); } }
+
+  
+    /* Square category tiles, centered in the available space. */
+    @media (min-width:861px) {
+      .view-home .home-stage { align-items:center; padding:32px 0; gap:40px; }
+      .view-home .home-left { height:min(100%, 34rem); }
+      .view-home .home-right, .view-home .home-cats { height:auto; align-items:center; justify-content:center; width:100%; }
+      .view-home .home-index { flex:none; width:min(100%, 34rem); height:auto; min-height:0; aspect-ratio:4 / 3; }
+      .view-home .hero-num { margin-bottom:16px; }
+      .view-home .pitch { margin-bottom:20px; }
+    }
+    @media (max-width:860px) {
+      .view-home .frame, .view-home .home-stage { height:auto; min-height:100dvh; }
+      .view-home .home-stage { grid-template-rows:auto auto; align-content:start; gap:14px; }
+      .view-home .home-right, .view-home .home-cats { width:100%; flex:none; align-items:center; }
+      .view-home .home-index { flex:none; width:min(100%, 30rem); height:auto; aspect-ratio:3 / 4; }
+    }
+
+  
+    /* Two rows within the catalog viewport; cards scroll internally when needed. */
+    @media (min-width:900px) and (min-height:650px) {
+      body.view-catalog { height:100dvh; overflow:hidden; }
+      .view-catalog .frame { height:100dvh; min-height:0; display:flex; flex-direction:column; }
+      .view-catalog .catalog { flex:1 1 auto; min-height:0; grid-template-rows:auto minmax(0,1fr); padding-bottom:10px; }
+      .view-catalog .list-wrap { height:100%; min-height:0; display:flex; flex-direction:column; }
+    }
+    .view-catalog .grid { display:grid; grid-auto-flow:column; grid-template-columns:none; grid-template-rows:repeat(2,minmax(0,1fr)); grid-auto-columns:22.5rem; gap:0; min-height:0; height:100%; overflow-x:auto; overflow-y:hidden; scroll-snap-type:none; overscroll-behavior-x:contain; touch-action:pan-x pan-y; scrollbar-width:thin; }
+    .view-catalog .card, .view-catalog .card:first-child { height:100%; min-height:0; padding:12px 16px; border-bottom:1px solid var(--rule); overflow:hidden; }
+    .view-catalog .card-scroll { min-height:0; overflow-y:auto; scrollbar-width:thin; }
+    .view-catalog .grid + .hbar { flex:0 0 16px; }
+    @media (max-width:899px), (max-height:649px) {
+      .view-catalog .grid { height: min(70vh, 650px); min-height:420px; grid-auto-columns:min(22.5rem, calc(100vw - 64px)); }
+    }
+
+  
+    .pitch-detail { display:block; margin-top:3px; color:var(--slate); font-size:.84em; line-height:1.5; font-weight:400; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .view-catalog .toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto auto auto minmax(12rem,20rem); grid-template-areas:"status sort min crit q"; gap:8px; align-items:end; }
+    .view-catalog .toolbar .field-sort, .view-catalog .toolbar .field-min { position:relative; display:block; width:42px; height:42px; }
+    .view-catalog .toolbar .field-sort label, .view-catalog .toolbar .field-min label { position:static; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border:1px solid var(--line-strong); border-radius:var(--radius); color:var(--ink); font-size:1.35rem; clip:auto; overflow:visible; cursor:pointer; }
+    .view-catalog .toolbar .field-sort select, .view-catalog .toolbar .field-min select { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+    .view-catalog .toolbar .field-sort:focus-within label, .view-catalog .toolbar .field-min:focus-within label { outline:2px solid var(--ledger); outline-offset:2px; }
+    .view-catalog .criteria summary { width:42px; min-height:42px; padding:0; font-size:1.25rem; }
+    .view-catalog .field-q label { display:none; }
+    .view-catalog .field-q input { min-height:42px; }
+    .view-catalog #fav-only { display:flex; width:100%; justify-content:flex-start; margin-bottom:12px; grid-area:auto; }
+    @media (max-width:700px) { .view-catalog .toolbar { grid-template-columns:1fr auto auto auto; grid-template-areas:"q q q q" "status sort min crit"; } .view-catalog .field-q { width:100%; } }
+
+  
+    html, body { height:100%; overflow:hidden; }
+    .scroll-track { display:none !important; }
+    .view-home .frame { height:100dvh; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none; }
+    .view-catalog .frame { height:100dvh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+    .view-catalog .catalog { flex:1 1 auto; min-height:0; }
+    .view-catalog .list-wrap { min-height:0; display:flex; flex-direction:column; }
+    .view-catalog .grid { flex:1 1 auto; height:auto; min-height:0; }
+    .view-catalog .card-scroll { overflow:hidden; }
+    .view-catalog .card-scroll .body-block, .view-catalog .card-scroll .user-note, .view-catalog .card-scroll .comment-panel { display:none; }
+    .view-catalog .card-scroll .tag { display:none; }
+    .view-catalog .card-tools { gap:4px; }
+    .view-catalog .card-tools .tool-btn { min-height:32px; padding:5px 8px; font-size:.78rem; }
+    .card-dialog { width:min(38rem, calc(100vw - 32px)); max-height:calc(100dvh - 32px); padding:20px; border:1px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink); overflow-y:auto; }
+    .card-dialog::backdrop { background:rgba(20,28,38,.5); }
+    .card-dialog .card-scroll { overflow:visible; display:flex; gap:12px; }
+    .view-catalog .card-dialog .card-scroll .body-block, .view-catalog .card-dialog .card-scroll .user-note:not([hidden]), .view-catalog .card-dialog .card-scroll .comment-panel:not([hidden]), .view-catalog .card-dialog .card-scroll .tag { display:block; }
+    .card-dialog .detail-close { float:right; }
+    .card-dialog .detail-btn { display:none; }
+    .card-dialog .card-tools { margin-top:16px; }
+    @media (max-width:899px), (max-height:649px) {
+      .view-catalog .catalog { display:flex; flex-direction:column; gap:8px; overflow:hidden; }
+      .view-catalog .deck { flex:0 1 auto; min-height:0; max-height:25dvh; overflow-y:auto; }
+      .view-catalog .toolbar { flex:0 0 auto; }
+      .view-catalog .list-wrap { flex:1 1 auto; }
+      .view-catalog .grid { height:auto; min-height:0; }
+      .view-catalog .card, .view-catalog .card:first-child { padding:8px; gap:4px; }
+      .view-catalog .card .name { font-size:1rem; }
+    }
+
+  
+    /* Keep the original card contents visible; only site controls indicate scrolling. */
+    .view-catalog .card-scroll { display:flex; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none; }
+    .view-catalog .card-scroll::-webkit-scrollbar, .view-catalog .grid::-webkit-scrollbar, .view-home .frame::-webkit-scrollbar, .view-catalog .deck::-webkit-scrollbar { display:none; }
+    .view-catalog .grid, .view-catalog .deck, .view-home .frame { scrollbar-width:none; -ms-overflow-style:none; }
+    .view-catalog .card-scroll .body-block, .view-catalog .card-scroll .user-note:not([hidden]), .view-catalog .card-scroll .comment-panel:not([hidden]), .view-catalog .card-scroll .tag { display:block; }
+
   </style>
 </head>
 <body class="view-home">
@@ -1087,7 +1237,7 @@
         <h1>사이트를 직접 방문해 평가한 주관적 별점</h1>
         <ol class="pitch">
           <li>각 사이트를 직접 열어 평가했습니다.</li>
-          <li>콘셉트, 내용, 실적을 같은 규칙으로 매겼습니다.</li>
+          <li><span>콘셉트, 내용, 실적을 같은 규칙으로 매겼습니다.<span class="pitch-detail">콘셉트와 사용성, 프로젝트 설명의 구체성, 경력·출시 작업을 뒷받침하는 근거를 함께 살펴봤습니다.</span></span></li>
           <li>주관적 별점이며, 절대적인 순위가 아닙니다.</li>
         </ol>
         <button type="button" id="enter-catalog">전체 목록 보기</button>
@@ -1101,8 +1251,11 @@
 
     <div class="catalog" id="catalog">
       <section class="deck" id="deck" data-mode="collapsed" aria-label="분류">
+        <button type="button" id="fav-only" aria-pressed="false">즐겨찾기만</button>
+        <h2 class="category-title">분야별로 찾아보기</h2>
+        <button type="button" id="category-back" hidden aria-label="분야 목록으로 돌아가기">← 뒤로</button>
         <div class="deck-board">
-          <button type="button" class="deck-card all-card" id="all-card" data-major="전체" aria-pressed="true"><span class="name">ALL</span><span class="n">766</span></button>
+          <button type="button" class="deck-card all-card" id="all-card" data-major="전체" aria-pressed="true"><span class="name">전체</span><span class="n">766</span></button>
           <div class="lane" id="major-lane" hidden>
             <div class="major-cards" id="major-cards" role="group" aria-label="큰분류"></div>
           </div>
@@ -1123,7 +1276,7 @@
           <input type="search" id="q" placeholder="이름, 직함, 설명, 평가, 코멘트에서 찾기" autocomplete="off">
         </div>
         <div class="field field-sort">
-          <label for="sort">정렬</label>
+          <label for="sort" title="정렬"><span aria-hidden="true">↕</span><span class="sr-only">정렬</span></label>
           <select id="sort">
             <option value="stars-desc" selected>별점 높은 순</option>
             <option value="stars-asc">별점 낮은 순</option>
@@ -1132,7 +1285,7 @@
           </select>
         </div>
         <div class="field field-min">
-          <label for="min">최소 별점</label>
+          <label for="min" title="최소 별점"><span aria-hidden="true">☆</span><span class="sr-only">최소 별점</span></label>
           <select id="min">
             <option value="0" selected>제한 없음</option>
             <option value="2">2점 이상</option>
@@ -1144,22 +1297,22 @@
             <option value="5">5점만</option>
           </select>
         </div>
-        <button type="button" id="fav-only" aria-pressed="false">즐겨찾기만</button>
         <details class="criteria">
-          <summary>별점 기준</summary>
+          <summary title="별점 기준" aria-label="별점 기준"><span aria-hidden="true">ⓘ</span></summary>
           <ul>
-            <li>5점: 콘셉트·내용·실적이 모두 뛰어나고 일관되며, 목록에서 손꼽히는 수준.</li>
-            <li>4~4.5점: 실무 경력이나 실제 출시 제품이 구체적이고, 구성이나 콘셉트에 분명한 강점이 있음.</li>
-            <li>3~3.5점: 성실하고 무난함. 내용은 있으나 템플릿 느낌이거나 대표 작업의 깊이가 약함.</li>
-            <li>2~2.5점: 학습·과제 수준 프로젝트, 일반적인 문구 위주, 마감이 거칠거나 관련 근거가 약함.</li>
-            <li>1~1.5점: 접속 불가, 내용이 거의 없거나 깨진 페이지.</li>
-            <li>즐겨찾기와 코멘트는 이 브라우저에만 저장되며, 서버로 전송되지 않습니다.</li>
+            <li><strong>살펴본 점:</strong> 사이트의 콘셉트와 사용성, 프로젝트 설명의 구체성, 경력과 작업을 뒷받침하는 실적을 함께 살펴봤습니다. 별점은 포트폴리오를 방문했을 때의 주관적 평가이며 개발자의 절대적인 실력 순위가 아닙니다.</li>
+            <li><strong>5점:</strong> 콘셉트와 구성, 프로젝트 설명과 실적이 모두 뛰어나고 일관됩니다. 목록에서 특히 참고할 만한 수준입니다.</li>
+            <li><strong>4~4.5점:</strong> 실무 경력이나 실제 출시 제품을 구체적으로 보여주며, 구성이나 콘셉트에도 뚜렷한 강점이 있습니다.</li>
+            <li><strong>3~3.5점:</strong> 필요한 내용을 성실하게 담았지만, 템플릿의 인상이 강하거나 대표 작업의 과정과 설명이 다소 얕습니다.</li>
+            <li><strong>2~2.5점:</strong> 학습·과제 수준의 작업이나 일반적인 소개 문구가 주를 이루고, 완성도 또는 주장을 뒷받침하는 근거가 부족합니다.</li>
+            <li><strong>1~1.5점:</strong> 방문 당시 접속이 어렵거나 페이지가 깨져 있거나, 평가할 수 있는 내용이 거의 없습니다.</li>
+            <li>평가는 방문 시점의 화면을 바탕으로 했으므로 현재 사이트와 다를 수 있습니다. 즐겨찾기와 코멘트는 이 브라우저에만 저장됩니다.</li>
           </ul>
         </details>
       </div>
 
       <main class="list-wrap">
-        <div class="grid" id="grid" tabindex="0" role="region" aria-label="사이트 목록, 가로로 넘겨 보기"></div>
+        <div class="grid" id="grid" tabindex="0" role="region" aria-label="사이트 목록"></div>
       </main>
     </div>
   </div>
@@ -1333,17 +1486,29 @@
           track.addEventListener("pointercancel", up);
         });
         scroller.addEventListener("scroll", update, { passive: true });
+        var wheelVelocity = 0, wheelFrame = 0;
+        function glide() {
+          var before = scroller.scrollLeft;
+          scroller.scrollLeft += wheelVelocity;
+          wheelVelocity *= 0.86;
+          if (Math.abs(wheelVelocity) > 0.15 && scroller.scrollLeft !== before) wheelFrame = requestAnimationFrame(glide);
+          else { wheelVelocity = 0; wheelFrame = 0; }
+        }
         scroller.addEventListener("wheel", function (ev) {
-          if (Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return;
-          var inner = ev.target.closest ? ev.target.closest(".card-scroll, textarea") : null;
-          if (inner && inner.scrollHeight > inner.clientHeight + 1) {
-            var atTop = inner.scrollTop <= 0;
-            var atBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 1;
-            if (!(ev.deltaY < 0 && atTop) && !(ev.deltaY > 0 && atBottom)) return;
-          }
           if (scroller.scrollWidth <= scroller.clientWidth + 1) return;
-          scroller.scrollLeft += ev.deltaY;
+          var inner = ev.target.closest ? ev.target.closest(".card-scroll, textarea") : null;
+          if (inner && Math.abs(ev.deltaY) > Math.abs(ev.deltaX) && inner.scrollHeight > inner.clientHeight + 1) {
+            var canScroll = ev.deltaY < 0 ? inner.scrollTop > 0 : inner.scrollTop + inner.clientHeight < inner.scrollHeight - 1;
+            if (canScroll) return;
+          }
+          var delta = Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? ev.deltaX : ev.deltaY;
+          if (ev.deltaMode === 1) delta *= 16;
+          if (ev.deltaMode === 2) delta *= scroller.clientWidth;
+          if (!delta) return;
           ev.preventDefault();
+          if (reduceMotion) { scroller.scrollLeft += delta; return; }
+          wheelVelocity = Math.max(-85, Math.min(85, wheelVelocity + delta * 0.17));
+          if (!wheelFrame) wheelFrame = requestAnimationFrame(glide);
         }, { passive: false });
         barUpdaters.push(update);
         return update;
@@ -1397,22 +1562,22 @@
         nodes.forEach(function (card, ci) {
           var r = card.getBoundingClientRect();
           var lag = ci * 40;
-          var count = 34;
+          var count = 120;
           for (var k = 0; k < count; k++) {
             var p = el("span", "dust");
-            var size = 2 + Math.random() * 4;
+            var size = 0.5 + Math.random() * 1.7;
             p.style.width = size + "px";
             p.style.height = size + "px";
             p.style.left = (r.left + Math.random() * r.width) + "px";
             p.style.top = (r.top + Math.random() * r.height) + "px";
             p.style.background = DUST_COLORS[(Math.random() * DUST_COLORS.length) | 0];
             layer.appendChild(p);
-            var tx = -(50 + Math.random() * 170);
-            var ty = -(36 + Math.random() * 120);
+            var tx = -(18 + Math.random() * 120);
+            var ty = -20 - Math.random() * 100 + (Math.random() - 0.5) * 35;
             p.animate([
-              { transform: "translate(0,0) rotate(0deg)", opacity: 0.95 },
+              { transform: "translate(0,0) rotate(0deg)", opacity: 0.35 + Math.random() * 0.5 },
               { transform: "translate(" + tx + "px," + ty + "px) rotate(" + ((Math.random() * 240) - 120) + "deg)", opacity: 0 }
-            ], { duration: 700 + Math.random() * 700, delay: lag + Math.random() * 260, easing: "cubic-bezier(.25,.6,.3,1)", fill: "both" });
+            ], { duration: 850 + Math.random() * 850, delay: lag + Math.random() * 260, easing: "cubic-bezier(.25,.6,.3,1)", fill: "both" });
           }
           card.style.pointerEvents = "none";
           card.animate([
@@ -1434,11 +1599,14 @@
       }
 
       function renderDeck() {
-        if (state.deck === "subs" && state.major === "전체") state.deck = "majors";
+        state.deck = state.major === "전체" ? "majors" : "subs";
         deck.setAttribute("data-mode", state.deck);
+        allCard.hidden = state.deck === "subs";
+        document.getElementById("category-back").hidden = state.deck !== "subs";
         allCard.setAttribute("aria-pressed", state.major === "전체" ? "true" : "false");
         allCard.querySelector(".n").textContent = String(DATA.length);
 
+        deck.querySelector(".deck-board").appendChild(subLane);
         majorRoot.textContent = "";
         majorLane.hidden = state.deck === "collapsed";
         if (state.deck !== "collapsed") {
@@ -1469,6 +1637,10 @@
           });
         }
 
+        if (state.deck === "subs") {
+          var activeMajor = majorRoot.querySelector('.major-card[aria-pressed="true"]');
+          if (activeMajor) activeMajor.insertAdjacentElement("afterend", subLane);
+        }
         var expanded = state.deck === "majors";
         andMore.setAttribute("aria-expanded", expanded ? "true" : "false");
         andMore.setAttribute("aria-label", expanded ? "큰분류 접기" : "큰분류 더 보기");
@@ -1489,37 +1661,44 @@
         if (fx.popSubs) popFrom(subRoot.querySelectorAll(".sub-card"), selected || allCard, 200);
       }
 
-      function onMajor(label, btn) {
+      function dustTransition(node, apply) {
+        if (!canAnimate) { apply(); return; }
         if (busy) return;
-        if (state.deck === "subs") {
+        busy = true;
+        snapAway([node], function () {
+          node.getAnimations().forEach(function (animation) { animation.cancel(); });
+          node.style.pointerEvents = "";
+          apply();
+          busy = false;
+          node.animate([{ opacity: 0, filter: "blur(2px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 300, easing: "ease-out" });
+        });
+      }
+      function onMajor(label, btn) {
+        if (state.major === label) return;
+        dustTransition(deck, function () {
+          state.major = label;
           state.sub = "전체";
           renderDeck();
           renderList();
-          return;
-        }
-        state.major = label;
-        state.sub = "전체";
-        renderList();
-        allCard.setAttribute("aria-pressed", "false");
-        var others = [];
-        Array.prototype.forEach.call(majorRoot.querySelectorAll(".major-card"), function (n) {
-          n.setAttribute("aria-pressed", n === btn ? "true" : "false");
-          if (n !== btn) others.push(n);
-        });
-        busy = true;
-        snapAway(others, function () {
-          busy = false;
-          setMode("subs", { popSubs: true, keep: btn });
         });
       }
+      document.getElementById("category-back").addEventListener("click", function () {
+        dustTransition(deck, function () {
+          state.major = "전체"; state.sub = "전체";
+          renderDeck(); renderList();
+          document.getElementById("all-card").focus();
+        });
+      });
 
       function onSub(label) {
-        if (busy) return;
-        state.sub = label;
-        Array.prototype.forEach.call(subRoot.querySelectorAll(".sub-card"), function (n) {
-          n.setAttribute("aria-pressed", n.getAttribute("data-sub") === label ? "true" : "false");
+        if (state.sub === label) return;
+        dustTransition(grid, function () {
+          state.sub = label;
+          Array.prototype.forEach.call(subRoot.querySelectorAll(".sub-card"), function (n) {
+            n.setAttribute("aria-pressed", n.getAttribute("data-sub") === label ? "true" : "false");
+          });
+          renderList();
         });
-        renderList();
       }
 
       allCard.addEventListener("click", function () {
@@ -1527,8 +1706,7 @@
         state.major = "전체";
         state.sub = "전체";
         renderList();
-        if (state.deck === "subs") setMode("majors", { popMajors: true });
-        else renderDeck();
+        renderDeck();
       });
 
       andMore.addEventListener("click", function () {
@@ -1539,18 +1717,7 @@
 
       /* —— Views —— */
       function dissolve(apply) {
-        if (reduceMotion) {
-          apply();
-          return;
-        }
-        if (fading) return;
-        fading = true;
-        document.body.classList.add("is-fade-out");
-        window.setTimeout(function () {
-          apply();
-          document.body.classList.remove("is-fade-out");
-          fading = false;
-        }, FADE_MS);
+        dustTransition(document.querySelector(".frame"), apply);
       }
 
       function showHome() {
@@ -1768,7 +1935,6 @@
         commentBtn.type = "button";
         tools.appendChild(commentBtn);
         card.appendChild(tools);
-
         function refreshNote() {
           var text = getComment(row.i);
           noteEl.textContent = "";
