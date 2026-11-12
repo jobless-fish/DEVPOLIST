@@ -1287,6 +1287,59 @@
     @media (min-width:900px) {
       .view-catalog .catalog { grid-template-columns:clamp(280px, 19vw, 360px) minmax(0, 1fr); }
     }
+    .review-chart {
+      flex: 0 0 auto;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 3px;
+      width: 100%;
+      margin-block: auto;
+      padding: 4px 6px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--ledger) 3%, var(--paper));
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    .review-chart:hover { border-color: var(--ledger); }
+    .review-chart:focus-visible { outline: 2px solid var(--ledger); outline-offset: -2px; }
+    .review-chart svg { display: block; width: min(100%, 256px); height: clamp(88px, 15vh, 143px); }
+    .review-chart .ring { fill: none; stroke: var(--rule); stroke-width: 1; }
+    .review-chart .outer-ring { fill: color-mix(in srgb, var(--ledger) 4%, transparent); stroke: var(--line-strong); }
+    .review-chart .spoke { stroke: var(--rule); stroke-width: 1; }
+    .review-chart .marker { stroke-width: 1.5; }
+    .review-chart .marker-review { fill: var(--ledger); stroke: var(--ledger); }
+    .review-chart .marker-description { fill: var(--paper); stroke: var(--ledger); }
+    .review-chart .marker-unmentioned { fill: var(--paper); stroke: var(--line-strong); }
+    .review-chart .axis-label { font: 600 12px var(--sans); fill: var(--ink); }
+    .review-chart .label-unmentioned { font-weight: 400; fill: var(--slate); }
+    .review-chart-caption { font: 600 .74rem/1.25 var(--sans); color: var(--ledger); }
+    .review-chart-caption .legend { margin-right: 8px; color: var(--slate); font-weight: 400; }
+    .review-preview {
+      position: fixed;
+      z-index: 201;
+      width: min(360px, calc(100vw - 16px));
+      max-height: calc(100dvh - 16px);
+      overflow: hidden;
+      pointer-events: none;
+      padding: 12px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 6px 24px rgba(20,30,45,.16);
+      overflow-wrap: anywhere;
+    }
+    .review-preview[hidden] { display: none; }
+    .review-preview .body-block p { font-size: .84rem; line-height: 1.55; }
+    .review-title { margin: 0 0 8px; font: 700 1rem/1.35 var(--sans); overflow-wrap: anywhere; }
+    .review-dialog-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .review-dialog-head .review-title { margin: 0; font-size: 1.15rem; }
+    .review-dialog-head button { flex: 0 0 auto; min-height: 36px; padding: 5px 12px; }
+    .review-dialog-criteria { margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--slate); font-size: .82rem; line-height: 1.5; }
+
   </style>
 </head>
 <body class="view-home">
@@ -1301,7 +1354,7 @@
     <div class="home-stage">
       <div class="home-left">
         <p class="brand" aria-label="DEVPOLIST"><span class="brand-devpo">DEVPO</span><span class="brand-list">LIST</span></p>
-        <p class="hero-num" style="--hero-total:977" aria-label="977곳"><span class="count">977</span><span class="unit">곳</span></p>
+        <p class="hero-num" style="--hero-total:1000" aria-label="1000곳"><span class="count">1000</span><span class="unit">곳</span></p>
         <h1>사이트를 직접 방문해 평가한 주관적 별점</h1>
         <ol class="pitch">
           <li>각 사이트를 방문해 확인한 내용을 평가했습니다. 본문이나 링크를 확인하기 어려운 곳은 별점을 보류했습니다.</li>
@@ -1323,7 +1376,7 @@
         <h2 class="category-title">분야별로 찾아보기</h2>
         <button type="button" id="category-back" hidden aria-label="분야 목록으로 돌아가기">← 뒤로</button>
         <div class="deck-board">
-          <button type="button" class="deck-card all-card" id="all-card" data-major="전체" aria-pressed="true"><span class="name">전체</span><span class="n">977</span></button>
+          <button type="button" class="deck-card all-card" id="all-card" data-major="전체" aria-pressed="true"><span class="name">전체</span><span class="n">1000</span></button>
           <div class="lane" id="major-lane" hidden>
             <div class="major-cards" id="major-cards" role="group" aria-label="큰분류"></div>
           </div>
@@ -1369,6 +1422,7 @@
           <summary title="별점 기준" aria-label="별점 기준"><span aria-hidden="true">ⓘ</span></summary>
           <ul>
             <li><strong>살펴본 점:</strong> 사이트의 콘셉트와 사용성, 프로젝트 설명의 구체성, 경력과 작업을 뒷받침하는 실적을 함께 살펴봤습니다. 별점은 포트폴리오를 방문했을 때의 주관적 평가이며 개발자의 절대적인 실력 순위가 아닙니다.</li>
+            <li><strong>육각형:</strong> 기존 설명과 평가에서 기준에 해당하는 표현을 찾아 표시합니다. 채운 점은 평가, 빈 파란 점은 설명, 작은 회색 점은 언급이 없음을 뜻합니다.</li>
             <li><strong>5점:</strong> 콘셉트와 구성, 프로젝트 설명과 실적이 모두 뛰어나고 일관됩니다. 목록에서 특히 참고할 만한 수준입니다.</li>
             <li><strong>4~4.5점:</strong> 실무 경력이나 실제 출시 제품을 구체적으로 보여주며, 구성이나 콘셉트에도 뚜렷한 강점이 있습니다.</li>
             <li><strong>3~3.5점:</strong> 필요한 내용을 성실하게 담았지만, 템플릿의 인상이 강하거나 대표 작업의 과정과 설명이 다소 얕습니다.</li>
@@ -1596,8 +1650,31 @@
 {"i":973,"major":"풀스택·웹","sub":"콘텐츠·오픈소스·연구","s":4,"d":"e-Akhbar, FlowKit, Lynkforge 등 작업과 기술 글을 공개하고 터미널 형식의 탐색을 제공함.","e":"프로젝트, 글, 경험을 개별 메뉴와 터미널 양쪽에서 찾을 수 있음. 각 작업의 배포 상태를 더 뚜렷이 구분하면 좋음.","name":"Prakhar Yadav","url":"https://prakharyxdev.vercel.app","tag":"Full Stack Developer | Tech Content Creator"},
 {"i":974,"major":"풀스택·웹","sub":"콘텐츠·오픈소스·연구","s":4,"d":"개발과 연구 기록을 공개하고 무료 기타 학습 사이트 Tonerune을 만들고 있음.","e":"기타 사이트의 키보드 조작과 여러 페이지를 검증한 방법을 글로 남겨 작업에서 내린 판단을 읽을 수 있음.","name":"Rizan Bhandari","url":"https://acchyut.com.np","tag":"Researcher & Full Stack Developer"},
 {"i":975,"major":"풀스택·웹","sub":"콘텐츠·오픈소스·연구","s":4.5,"d":"FOSSASIA의 GSoC에서 Jitsi 기반 공간형 WebRTC 서비스를 개발하고 오픈소스 저장소를 관리함.","e":"어떤 커뮤니티에서 어떤 시스템을 만들었는지 경력과 기술을 연결해 기여 내역을 이해하기 좋음.","name":"Saksham Sirohi","url":"https://saksham-sirohi.github.io","tag":"Software Engineer | Open Source | Full Stack"},
-{"i":976,"major":"풀스택·웹","sub":"콘텐츠·오픈소스·연구","s":4,"d":"데스크톱 운영체제 콘셉트로 풀스택 작업과 오픈소스 활동을 소개하는 학생 개발자.","e":"프로젝트와 공개 저장소로 갈 수 있는 메뉴와 키보드 단축키를 제공함. 대표 기여의 구체적 변경과 결과를 앞에 두면 좋음.","name":"Vaibhav Singh","url":"https://www.vaibhavspace.tech","tag":"Full Stack Developer | Open Source Developer"}]</script>
-  <script type="application/json" id="taxonomy-data">{"AI":["LLM·에이전트·생성형 AI","AI 자동화(n8n·RPA 등)","ML·딥러닝·컴퓨터비전","데이터 사이언스·데이터 엔지니어링","AI 엔지니어","AI 겸업 (풀스택·로보틱스 등)"],"디자인·크리에이티브":["크리에이티브 개발자","웹 디자인","디자인 엔지니어","UI/UX 디자인","프로덕트 디자인","그래픽 디자인","3D·WebGL","크리에이티브 테크놀로지스트"],"데이터":["데이터 엔지니어","데이터 분석가","데이터 사이언티스트","데이터 엔지니어·분석"],"게임":["게임 개발","게임+웹·앱"],"소프트웨어":["소프트웨어 엔지니어","소프트웨어 개발자","학생·인턴","시니어·리드","아키텍트"],"프론트엔드":["프론트엔드 개발자","프론트엔드 엔지니어","프론트 중심 풀스택","프론트 중심 풀스택(시니어)","프론트엔드+크리에이티브","프론트엔드+UI/UX","시니어·리드","스태프·프린시펄","학생·인턴"],"모바일":["모바일 개발","Flutter","Android","iOS","React Native","크로스플랫폼","시니어·리드"],"보안":["보안","보안 연구자","디벨로퍼 애드보킷","학생"],"백엔드":["시니어·리드","분산 시스템","백엔드 엔지니어","백엔드 개발자","학생·지망"],"데브옵스·클라우드":["시니어·리드","클라우드 아키텍트","SRE","클라우드 엔지니어","DevOps 엔지니어","학생"],"기타":["시니어·리드","창업·리더","프로덕트·PM","QA","세일즈포스·CRM","ERP·비즈니스 시스템","워드프레스·CMS","임베디드·하드웨어","시스템·인프라","특화 개발","학생·지망","사진·마케팅","기타"],"풀스택·웹":["풀스택 개발자","React·Node.js","Java·Spring","Python·Django·FastAPI",".NET·C#","PHP·Laravel","웹 개발자","웹 개발·에이전시","디자인·UI/UX 겸업","클라우드·DevOps 겸업","리드·시니어·아키텍트","학생·초기 경력","디자인·UI/UX·3D","모바일·앱·게임","AI·데이터·자동화","CMS·커머스·웹빌더","클라우드·DevOps·시스템","보안·암호화","블록체인·Web3","임베디드·IoT","프리랜서·창업·기획","콘텐츠·오픈소스·연구","확인 필요"]}</script>
+{"i":976,"major":"풀스택·웹","sub":"콘텐츠·오픈소스·연구","s":4,"d":"데스크톱 운영체제 콘셉트로 풀스택 작업과 오픈소스 활동을 소개하는 학생 개발자.","e":"프로젝트와 공개 저장소로 갈 수 있는 메뉴와 키보드 단축키를 제공함. 대표 기여의 구체적 변경과 결과를 앞에 두면 좋음.","name":"Vaibhav Singh","url":"https://www.vaibhavspace.tech","tag":"Full Stack Developer | Open Source Developer"},
+{"i":977,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"타자 연습, iBlogs, 색상 팔레트 도구와 에이전시 사이트를 소개하는 Next.js 개발자.","e":"작업마다 실제 링크와 목적이 있어 빠르게 둘러볼 수 있음. 반복되는 기술 목록보다 프로젝트별 설계 판단이 더 드러나면 좋음.","name":"Avinash Suthar","url":"https://avinashsuthar.in","tag":"Full Stack Developer"},
+{"i":978,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"운영체제 콘셉트의 포트폴리오에서 자연어 기반 COS Alpha와 분산 재난 대응 시스템 Sentinel을 소개함.","e":"작업 창에서 기능과 사용 기술을 함께 확인할 수 있음. 정확도와 성능 수치에는 측정 방법이나 시연 링크가 더 있으면 좋음.","name":"Priyanshu Ghosh","url":"https://priyanshu-ghosh-seven.vercel.app","tag":"Full Stack Developer"},
+{"i":979,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"Angular·Node.js 경력과 eUTxO.org, Angular.sk, Phaser를 사용한 사이트 구현을 정리함.","e":"기술별 경험과 직접 만든 작업, 현재 사이트의 구현 설명을 나눠 공개해 개발 과정을 따라가기 좋음.","name":"Peter Oravec","url":"https://peteroravec.com","tag":"Full Stack Developer"},
+{"i":980,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"검사 예약 AryoPath, 영상 학습 플랫폼 Sales Syllabus, Flutter 생활 서비스 앱 Citikeeper를 소개함.","e":"고객 작업과 개인 프로젝트를 구분하고 예약·결제·배정 같은 기능과 본인 역할을 설명해 작업의 범위가 잘 보임.","name":"Sonu Hansda","url":"https://sonu-hansda.netlify.app","tag":"Full Stack Developer"},
+{"i":981,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"Bitzify 인턴으로 일하며 Spring Boot·ASP.NET·Python 기반 작업과 웹·백엔드·모바일 사례를 소개함.","e":"현재 역할, 핵심 기술, 사례와 데모가 첫 화면에서 구분돼 탐색하기 좋음. 업무에서 맡은 변경을 더 구체화하면 좋음.","name":"Anushka Isuranga","url":"https://anushkaisuranga.github.io","tag":"Full Stack Developer"},
+{"i":982,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"Crecientech에서 멀티테넌트 Node.js API와 React Native 앱을 개발하고 Aara Co의 주문 관리 도구를 제작함.","e":"업무별 API, 화면, 주문 처리에서 맡은 일을 구체적으로 기록함. 실제 운영 결과와 연결되면 비교하기 더 쉬움.","name":"Brihadeesh","url":"https://briha.xyz","tag":"Full Stack Developer"},
+{"i":983,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"UOMO 쇼핑몰과 ADSONS의 회사 사이트 및 직원 근태 시스템을 작업 사례로 소개함.","e":"고객의 판매·홍보·내부 운영 문제를 구분해 제작 목적이 분명함. 근태 시스템의 사용 흐름과 운영 효과를 더 보여주면 좋음.","name":"Zaryab Mahmood","url":"https://zubbihawk.netlify.app","tag":"Full Stack Developer"},
+{"i":984,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"실시간 메시징 앱, 업무용 POS 흐름과 풀스택 개발 경력을 작업별로 정리함.","e":"기능과 기술, 업무에서 맡은 연동 범위를 설명해 개인 작업과 실무를 비교하기 좋음.","name":"Rahul Khatwani","url":"https://rahulkhatwani.vercel.app","tag":"Full Stack Developer"},
+{"i":985,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"SCP:SL·FiveM 커뮤니티를 위한 C# 플러그인, 게임 데이터 대시보드와 관리 사이트를 소개함.","e":"게임과 웹 사이에서 실제로 연동한 기능이 구체적이고 라이브 사이트와 저장소를 구분해 연결함.","name":"Vip3R","url":"https://vip3r-portfolio.vercel.app","tag":"Full Stack Web Developer | Exiled Developer"},
+{"i":986,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"로그인 화면과 명령어 입력을 콘셉트로 한 인터랙티브 터미널 포트폴리오. 이력서와 GitHub를 연결함.","e":"처음 방문해도 소개 명령어와 바로가기 힌트가 보임. 작업 사례까지 찾아가는 데는 명령어를 익히는 단계가 있음.","name":"Tirth Dhedhi","url":"https://www.tirthdhedhi.dev","tag":"Full Stack Developer"},
+{"i":987,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"BugFixer와 개발 노트 DevNotes, 초보 개발자를 돕는 교육 콘텐츠를 소개함.","e":"직접 만든 도구와 글로 이어지는 링크가 분명함. 각 프로젝트의 구조와 본인 기여를 한 화면에서 더 자세히 볼 수 있으면 좋음.","name":"Abdullah Al Monir","url":"https://abdullahalmonir.com","tag":"Full Stack Developer"},
+{"i":988,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"PuzzleSlide, React·Go 기반 농담 생성기와 Django 쇼핑몰을 제작하고 Python 인턴 경력을 소개함.","e":"작업별 구현 기술과 배포 환경을 설명해 UI, API, 자동 배포에서 한 일을 파악할 수 있음.","name":"Atul Gupta","url":"https://atul-portfolio-work.vercel.app","tag":"Full Stack Developer"},
+{"i":989,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"DeFAI, ADfluence, FitBuddy, Prolingo 등 다양한 앱을 프로젝트 목록에 정리함.","e":"작업을 이름과 간단한 소개로 훑기 쉬움. 문제를 해결한 과정이나 팀에서 맡은 범위를 더 구체적으로 제시하면 좋음.","name":"Ayush Das","url":"https://ayushdas.vercel.app","tag":"Full Stack Developer"},
+{"i":990,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4.5,"d":"자체 호스팅 도구, 금융 데이터 처리와 AI 연동을 다루는 개발자. 실제 요청 흐름과 성능 개선을 사례로 풀어냄.","e":"문제를 어떻게 재현하고 측정했는지 설명하고 금융 계산과 AI가 담당하는 경계를 구체적으로 보여줌.","name":"Yuelin Liu","url":"https://www.liuyuelin.dev","tag":"Full Stack Developer"},
+{"i":991,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"TypeScript·NestJS·Go 기반 제품과 알림·이메일 전송 흐름, 개발팀 리드 경험을 소개함.","e":"기술 목록에서 끝나지 않고 메시지 전송 과정과 운영상 고려 사항을 작업의 문제와 연결해 설명함.","name":"Tuan Le Anh","url":"https://tuanleanh.com","tag":"Full Stack Developer"},
+{"i":992,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"Three.js로 만든 투명한 수조 같은 3D 화면에 기술 아이콘을 배치하고 프로필 링크를 제공함.","e":"재질과 색을 살린 연출이 독특함. 첫 화면에서 글로 읽을 수 있는 프로젝트 설명과 탐색 힌트는 적음.","name":"Philippe Fanaro","url":"https://aquarifolio.vercel.app","tag":"Full Stack Developer"},
+{"i":993,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":2.5,"d":"자기소개, 기술, 작업, 학업 메뉴를 제공하는 Sayyed Rabeeh의 학습 단계 포트폴리오.","e":"소개와 탐색 경로는 보이지만 어떤 프로젝트를 만들고 어떤 결과를 얻었는지 판단할 구체적인 사례가 적음.","name":"Sayyed","url":"https://sayyedrabeeh.github.io/portfoliyo/","tag":"Full Stack Developer"},
+{"i":994,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4.5,"d":"Lootea 앱·ERP, 다국어 식당 사이트, 게임 현지화 자동화를 소개하는 풀스택 개발자.","e":"작업의 연도·진행 상태와 기능을 같이 제시하고 앱과 ERP가 어떻게 연결되는지 설명해 실무 맥락을 파악하기 좋음.","name":"Tomáš Đinh","url":"https://tomasdinh.cz","tag":"Full Stack Developer"},
+{"i":995,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":3.5,"d":"MERN과 NestJS를 사용하는 웹 개발자. URL 단축기, 온라인 경매, 도서 관리 시스템을 소개함.","e":"개별 작업과 기술을 쉽게 찾을 수 있음. 코드 링크에 더해 핵심 기능과 결과를 시연하면 비교하기 좋음.","name":"Avnish Kumar","url":"https://theavnishkumar.in","tag":"Full Stack Developer"},
+{"i":996,"major":"풀스택·웹","sub":"일반 풀스택·웹","s":4,"d":"CFMOTO Brazil 사이트의 주요 화면과 법률 사무소 사이트, 기숙사 검색 도구를 소개함.","e":"실무·프리랜스·개인 작업을 구분하고 CFMOTO에서 만든 화면을 구체적으로 적어 개인 기여가 명확함.","name":"Luiz Gustavo Alves","url":"https://www.luizgustavoalves.dev","tag":"Full Stack Developer"},
+{"i":997,"major":"풀스택·웹","sub":"PHP·Laravel","s":4,"d":"Tyler Technologies에서 시스템 연동을 맡았으며 Laravel 기반 쇼핑몰에 PayPal·Stripe 결제를 통합함.","e":"이력서 형식으로 회사별 기간과 기능, 멘토링을 정리해 경력을 빠르게 읽을 수 있음. 대표 작업의 시연은 더 있으면 좋음.","name":"Bishnu Pokhrel","url":"https://bishnupokhrel.netlify.app","tag":"Full Stack Laravel Vue Developer"},
+{"i":998,"major":"풀스택·웹","sub":"PHP·Laravel","s":4.5,"d":"PHP·Laravel, React·Astro를 다루고 Parker University의 웹 서비스와 세미나 등록 플랫폼을 소개함.","e":"기관 내 여러 서비스의 목적과 실제 링크를 함께 제시하고 경력과 구현에 사용한 기술을 구분해 읽기 쉬움.","name":"Leo Ashcraft","url":"https://leoashcraft.com","tag":"Full Stack Software Developer | PHP, React, Astro"},
+{"i":999,"major":"풀스택·웹","sub":"PHP·Laravel","s":4.5,"d":"Laravel·Vue 기반 경력을 중심으로 Solarplus, CoBabble 등 제품과 AWS 배포·모바일 개발 경험을 소개함.","e":"회사별 경력과 최근 계약 작업, 출시 제품을 분리하고 제품별 담당 업무를 확인하기 좋음.","name":"Richard Porter","url":"https://richardporter.dev","tag":"Full Stack Developer | Laravel | Vue | React"}]</script>
+  <script type="application/json" id="taxonomy-data">{"AI":["LLM·에이전트·생성형 AI","AI 자동화(n8n·RPA 등)","ML·딥러닝·컴퓨터비전","데이터 사이언스·데이터 엔지니어링","AI 엔지니어","AI 겸업 (풀스택·로보틱스 등)"],"디자인·크리에이티브":["크리에이티브 개발자","웹 디자인","디자인 엔지니어","UI/UX 디자인","프로덕트 디자인","그래픽 디자인","3D·WebGL","크리에이티브 테크놀로지스트"],"데이터":["데이터 엔지니어","데이터 분석가","데이터 사이언티스트","데이터 엔지니어·분석"],"게임":["게임 개발","게임+웹·앱"],"소프트웨어":["소프트웨어 엔지니어","소프트웨어 개발자","학생·인턴","시니어·리드","아키텍트"],"프론트엔드":["프론트엔드 개발자","프론트엔드 엔지니어","프론트 중심 풀스택","프론트 중심 풀스택(시니어)","프론트엔드+크리에이티브","프론트엔드+UI/UX","시니어·리드","스태프·프린시펄","학생·인턴"],"모바일":["모바일 개발","Flutter","Android","iOS","React Native","크로스플랫폼","시니어·리드"],"보안":["보안","보안 연구자","디벨로퍼 애드보킷","학생"],"백엔드":["시니어·리드","분산 시스템","백엔드 엔지니어","백엔드 개발자","학생·지망"],"데브옵스·클라우드":["시니어·리드","클라우드 아키텍트","SRE","클라우드 엔지니어","DevOps 엔지니어","학생"],"기타":["시니어·리드","창업·리더","프로덕트·PM","QA","세일즈포스·CRM","ERP·비즈니스 시스템","워드프레스·CMS","임베디드·하드웨어","시스템·인프라","특화 개발","학생·지망","사진·마케팅","기타"],"풀스택·웹":["풀스택 개발자","일반 풀스택·웹","React·Node.js","Java·Spring","Python·Django·FastAPI",".NET·C#","PHP·Laravel","웹 개발자","웹 개발·에이전시","디자인·UI/UX 겸업","클라우드·DevOps 겸업","리드·시니어·아키텍트","학생·초기 경력","디자인·UI/UX·3D","모바일·앱·게임","AI·데이터·자동화","CMS·커머스·웹빌더","클라우드·DevOps·시스템","보안·암호화","블록체인·Web3","임베디드·IoT","프리랜서·창업·기획","콘텐츠·오픈소스·연구","확인 필요"]}</script>
   <script>
     (function () {
       "use strict";
@@ -2083,6 +2160,7 @@
       }
 
       function showHome() {
+        hideReviewPreview();
         document.body.classList.remove("view-catalog");
         document.body.classList.add("view-home");
         document.getElementById("nav-home").hidden = true;
@@ -2185,6 +2263,7 @@
       }
 
       function openCommentPanel(panel) {
+        hideReviewPreview();
         panel.hidden = false;
         panel.closest(".card").classList.add("is-editing");
         panel.classList.remove("is-open");
@@ -2229,6 +2308,138 @@
       grid.addEventListener("scroll", hideCommentTip, { passive:true });
       window.addEventListener("blur", hideCommentTip);
 
+      // These markers index topics in the existing notes. They do not assign scores.
+      var reviewAxes = [
+        { label: "전문성", pattern: /전문|기술|스택|아키텍처|프레임워크|인프라|엔지니어|API|React|Spring|Laravel/i, x:128, y:13, anchor:"middle" },
+        { label: "창의성", pattern: /창의|콘셉트|컨셉|독특|개성|실험|연출|애니메이션|테마|모션|3D/i, x:174, y:44, anchor:"start" },
+        { label: "사용성", pattern: /사용성|사용자|탐색|접근성|반응형|읽기|메뉴|가독성|인터페이스|\b(?:UI|UX)\b/i, x:174, y:93, anchor:"start" },
+        { label: "구현", pattern: /구현|구조|기능|설계|구축|연동|통합|성능|데이터베이스|백엔드/i, x:128, y:127, anchor:"middle" },
+        { label: "경력·기여", pattern: /경력|기여|경험|역할|담당|인턴|실무|협업|팀|고객사/i, x:82, y:93, anchor:"end" },
+        { label: "실적·근거", pattern: /실적|성과|근거|데모|배포|출시|공개|저장소|링크|운영|수상|GitHub/i, x:82, y:44, anchor:"end" }
+      ];
+      var reviewStates = {
+        review: "평가에 언급",
+        description: "설명에 언급",
+        unmentioned: "기록에 언급 없음"
+      };
+
+      function reviewAxisState(row, axis) {
+        if (row.s === null) return "unmentioned";
+        if (axis.pattern.test(row.e)) return "review";
+        return axis.pattern.test(row.d) ? "description" : "unmentioned";
+      }
+
+      function reviewBody(row) {
+        var body = el("div", "body-block");
+        var description = el("p", "desc");
+        description.appendChild(el("span", "k", "설명"));
+        description.appendChild(document.createTextNode(row.d));
+        var evaluation = el("p", "eval");
+        evaluation.appendChild(el("span", "k", row.s === null ? "확인 상태" : "평가"));
+        evaluation.appendChild(document.createTextNode(row.e));
+        body.append(description, evaluation);
+        return body;
+      }
+
+      function chartPoint(index, radius) {
+        var angle = index * Math.PI / 3 - Math.PI / 2;
+        return { x: 128 + radius * Math.cos(angle), y: 68 + radius * Math.sin(angle) };
+      }
+
+      function renderReviewChart(row) {
+        var button = el("button", "review-chart");
+        button.type = "button";
+        button.setAttribute("aria-haspopup", "dialog");
+        button.setAttribute("aria-label", row.name + " 설명과 평가 보기");
+        var chart = svgEl("svg", { viewBox:"0 0 256 136", "aria-hidden":"true", focusable:"false" });
+        [43, 29, 15].forEach(function (radius, index) {
+          var points = reviewAxes.map(function (_, i) {
+            var point = chartPoint(i, radius);
+            return point.x.toFixed(2) + "," + point.y.toFixed(2);
+          });
+          chart.appendChild(svgEl("polygon", { points:points.join(" "), class:index === 0 ? "ring outer-ring" : "ring" }));
+        });
+        reviewAxes.forEach(function (axis, index) {
+          var point = chartPoint(index, 43);
+          var state = reviewAxisState(row, axis);
+          chart.appendChild(svgEl("line", { x1:128, y1:68, x2:point.x, y2:point.y, class:"spoke" }));
+          chart.appendChild(svgEl("circle", { cx:point.x, cy:point.y, r:state === "unmentioned" ? 2.2 : 3.6, class:"marker marker-" + state }));
+          var label = svgEl("text", { x:axis.x, y:axis.y, "text-anchor":axis.anchor, class:"axis-label label-" + state });
+          label.textContent = axis.label;
+          chart.appendChild(label);
+        });
+        var caption = el("span", "review-chart-caption");
+        caption.appendChild(el("span", "legend", row.s === null ? "평가 보류" : "기록에 나온 기준"));
+        caption.appendChild(document.createTextNode("설명·평가 보기 ↗"));
+        button.append(chart, caption);
+        button.addEventListener("click", function () { showReviewDialog(row); });
+        return button;
+      }
+
+      var reviewPreview = el("div", "review-preview");
+      reviewPreview.hidden = true;
+      reviewPreview.setAttribute("aria-hidden", "true");
+      document.body.appendChild(reviewPreview);
+      var previewRow = null, previewSize, dismissedPreviewRow = null;
+
+      function hideReviewPreview() {
+        reviewPreview.hidden = true;
+        previewRow = null;
+      }
+
+      function moveReviewPreview(row, event) {
+        if (dismissedPreviewRow === row || reviewDialog.open) return;
+        if (previewRow !== row) {
+          reviewPreview.replaceChildren(el("p", "review-title", row.name), reviewBody(row));
+          reviewPreview.hidden = false;
+          previewRow = row;
+          previewSize = reviewPreview.getBoundingClientRect();
+        }
+        var gap = 16, edge = 8;
+        var x = event.clientX + gap, y = event.clientY + gap;
+        if (x + previewSize.width + edge > window.innerWidth) x = event.clientX - gap - previewSize.width;
+        if (y + previewSize.height + edge > window.innerHeight) y = event.clientY - gap - previewSize.height;
+        reviewPreview.style.left = Math.max(edge, x) + "px";
+        reviewPreview.style.top = Math.max(edge, y) + "px";
+      }
+
+      var reviewDialog = el("dialog", "card-dialog review-dialog");
+      reviewDialog.setAttribute("aria-labelledby", "review-dialog-title");
+      var reviewDialogHead = el("div", "review-dialog-head");
+      var reviewDialogTitle = el("h2", "review-title");
+      reviewDialogTitle.id = "review-dialog-title";
+      var reviewClose = el("button", "tool-btn", "닫기");
+      reviewClose.type = "button";
+      reviewClose.autofocus = true;
+      reviewClose.addEventListener("click", function () { reviewDialog.close(); });
+      var reviewDialogContent = el("div");
+      reviewDialogHead.append(reviewDialogTitle, reviewClose);
+      reviewDialog.append(reviewDialogHead, reviewDialogContent);
+      document.body.appendChild(reviewDialog);
+
+      function showReviewDialog(row) {
+        hideReviewPreview();
+        hideCommentTip();
+        reviewDialogTitle.textContent = row.name;
+        var summary = row.s === null ? "평가 보류" : reviewAxes.map(function (axis) {
+          return axis.label + " · " + reviewStates[reviewAxisState(row, axis)];
+        }).join(" / ");
+        reviewDialogContent.replaceChildren(reviewBody(row), el("p", "review-dialog-criteria", summary));
+        reviewDialog.scrollTop = 0;
+        reviewDialog.showModal();
+      }
+
+      grid.addEventListener("scroll", hideReviewPreview, { passive:true, capture:true });
+      window.addEventListener("blur", hideReviewPreview);
+      window.addEventListener("resize", hideReviewPreview);
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && previewRow) {
+          dismissedPreviewRow = previewRow;
+          hideReviewPreview();
+        }
+      });
+
+
       function renderCard(row, pos) {
         var card = el("article", "card");
         card.setAttribute("data-i", String(row.i));
@@ -2259,16 +2470,7 @@
         meta.appendChild(el("span", "tag", row.tag));
         scroll.appendChild(meta);
 
-        var body = el("div", "body-block");
-        var d = el("p", "desc");
-        d.appendChild(el("span", "k", "설명"));
-        d.appendChild(document.createTextNode(row.d));
-        var e = el("p", "eval");
-        e.appendChild(el("span", "k", row.s === null ? "확인 상태" : "평가"));
-        e.appendChild(document.createTextNode(row.e));
-        body.appendChild(d);
-        body.appendChild(e);
-        scroll.appendChild(body);
+        scroll.appendChild(renderReviewChart(row));
 
         var existing = getComment(row.i);
         var noteEl = el("p", "user-note");
@@ -2329,13 +2531,30 @@
         tools.appendChild(commentBtn);
         card.appendChild(tools);
         card.addEventListener("pointermove", function (event) {
-          if (event.pointerType !== "mouse" || card.classList.contains("is-editing")) { hideCommentTip(); return; }
-          var text = getComment(row.i);
-          if (!text) { hideCommentTip(); return; }
-          showCommentTip(text, event.clientX, event.clientY);
+          if (event.pointerType !== "mouse" || card.classList.contains("is-editing") || event.buttons) {
+            hideCommentTip();
+            hideReviewPreview();
+            return;
+          }
+          var note = getComment(row.i);
+          if (note && event.target.closest(".comment-btn, .user-note")) {
+            hideReviewPreview();
+            showCommentTip(note, event.clientX, event.clientY);
+            return;
+          }
+          hideCommentTip();
+          if (event.target.closest(".card-tools")) hideReviewPreview();
+          else moveReviewPreview(row, event);
         });
-        card.addEventListener("pointerleave", hideCommentTip);
-        card.addEventListener("pointerdown", hideCommentTip);
+        card.addEventListener("pointerleave", function () {
+          if (dismissedPreviewRow === row) dismissedPreviewRow = null;
+          hideCommentTip();
+          hideReviewPreview();
+        });
+        card.addEventListener("pointerdown", function () {
+          hideCommentTip();
+          hideReviewPreview();
+        });
         function refreshNote() {
           var text = getComment(row.i);
           noteEl.textContent = "";
@@ -2491,6 +2710,7 @@
       function renderList(keepScroll) {
         if (momentum.has(grid)) momentum.get(grid).stop();
         hideCommentTip();
+        hideReviewPreview();
         var prev = grid.scrollLeft;
         mounted.forEach(rememberCard);
         mounted.clear();
