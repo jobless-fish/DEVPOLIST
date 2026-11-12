@@ -780,19 +780,40 @@
     }
     .card:first-child { padding-left: 2px; }
     .card-top {
-      display: flex;
-      justify-content: space-between;
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-rows: 32px 22px 20px;
+      gap: 2px;
+      min-width: 0;
+    }
+    .card-title {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
-    .idx {
-      font-family: var(--mono);
-      font-size: 1.35rem;
-      font-weight: 400;
-      line-height: 1;
+    .card-title .name, .card-top .cat {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .site-link {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
       color: var(--ink);
-      font-variant-numeric: tabular-nums;
     }
+    .site-link:hover { color: var(--ledger); border-color: var(--ledger); }
+    .site-link:focus-visible { outline: 2px solid var(--ledger); outline-offset: -2px; }
+    .card-rating { display: flex; justify-content: flex-end; align-items: center; white-space: nowrap; }
+    .card-category { display: flex; align-items: center; gap: 6px; min-width: 0; line-height: 1.25; }
+    .card-category .cat-major { max-width: 50%; }
+    .card-category .cat-sub::before { content: none; }
+    .category-separator { flex: none; color: var(--line-strong); }
     .stars {
       display: inline-flex;
       align-items: center;
@@ -1322,8 +1343,11 @@
     .review-chart .marker-unmentioned { fill: var(--paper); stroke: var(--line-strong); }
     .review-chart .axis-label { font: 600 12px var(--sans); fill: var(--ink); }
     .review-chart .label-unmentioned { font-weight: 400; fill: var(--slate); }
-    .review-chart-caption { font: 600 .74rem/1.25 var(--sans); color: var(--ledger); }
+    .review-chart-caption { display: none; font: 600 .74rem/1.25 var(--sans); color: var(--ledger); }
     .review-chart-caption .legend { margin-right: 8px; color: var(--slate); font-weight: 400; }
+    @media (max-width: 700px), (hover: none), (pointer: coarse) {
+      .review-chart-caption { display: block; }
+    }
     .review-preview {
       position: fixed;
       z-index: 201;
@@ -2338,6 +2362,12 @@
 
       function reviewBody(row) {
         var body = el("div", "body-block");
+        if (row.tag) {
+          var tag = el("p", "review-tag");
+          tag.appendChild(el("span", "k", "직종 태그"));
+          tag.appendChild(document.createTextNode(row.tag));
+          body.appendChild(tag);
+        }
         var description = el("p", "desc");
         description.appendChild(el("span", "k", "설명"));
         description.appendChild(document.createTextNode(row.d));
@@ -2457,26 +2487,30 @@
         card.setAttribute("data-fav", isFav(row.i) ? "1" : "0");
 
         var top = el("div", "card-top");
-        top.appendChild(el("div", "idx", String(pos)));
-        top.appendChild(starRow(row.s));
+        var title = el("div", "card-title");
+        title.appendChild(el("h2", "name", row.name));
+        var link = el("a", "site-link");
+        link.href = row.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.setAttribute("aria-label", row.name + " 사이트 열기 (새 탭)");
+        var icon = svgEl("svg", { viewBox:"0 0 24 24", width:16, height:16, fill:"none",
+          stroke:"currentColor", "stroke-width":1.7, "stroke-linecap":"round",
+          "stroke-linejoin":"round", "aria-hidden":"true", focusable:"false" });
+        icon.appendChild(svgEl("path", { d:"M13 5h6v6m0-6-9 9m7-1v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h5" }));
+        link.appendChild(icon);
+        title.appendChild(link);
+
+        var rating = el("div", "card-rating");
+        rating.appendChild(starRow(row.s));
+        var category = el("div", "card-category");
+        var separator = el("span", "category-separator", "/");
+        separator.setAttribute("aria-hidden", "true");
+        category.append(el("span", "cat cat-major", row.major), separator, el("span", "cat cat-sub", row.sub));
+        top.append(title, rating, category);
         card.appendChild(top);
 
         var scroll = el("div", "card-scroll");
-        var h = el("h2", "name");
-        var a = document.createElement("a");
-        a.href = row.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = row.name;
-        h.appendChild(a);
-        scroll.appendChild(h);
-
-        var meta = el("div", "meta-row");
-        meta.appendChild(el("span", "cat cat-major", row.major));
-        meta.appendChild(el("span", "cat cat-sub", row.sub));
-        meta.appendChild(el("span", "tag", row.tag));
-        scroll.appendChild(meta);
-
         scroll.appendChild(renderReviewChart(row));
 
         var existing = getComment(row.i);
