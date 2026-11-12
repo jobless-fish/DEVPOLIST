@@ -1359,6 +1359,9 @@
       border: 1px solid var(--line-strong);
       border-radius: 8px;
       background: var(--paper);
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
       color: var(--ink);
       box-shadow: 0 6px 24px rgba(20,30,45,.16);
       overflow-wrap: anywhere;
