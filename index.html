@@ -1287,6 +1287,13 @@
     @media (min-width:900px) {
       .view-catalog .catalog { grid-template-columns:clamp(280px, 19vw, 360px) minmax(0, 1fr); }
     }
+    .view-catalog .grid {
+      --card-rows: 2;
+      grid-template-rows: repeat(var(--card-rows), minmax(0, 1fr));
+    }
+    @media (max-width: 700px), (max-height: 780px) {
+      .view-catalog .grid { --card-rows: 1; }
+    }
     .review-chart {
       flex: 0 0 auto;
       display: grid;
@@ -2619,10 +2626,19 @@
         scope.title = scope.textContent;
       }
 
-      // Two cards per column, plus two columns (four cards) on either side.
+      // Mount the visible cards plus two columns on either side.
       // Only lightweight data survives eviction; detached card DOM is not cached.
       var listRows = [], mounted = new Map(), cardMemory = new Map();
-      var listFrame = 0, columnWidth = 360, searchTimer = 0;
+      var listFrame = 0, columnWidth = 360, cardRows = 2, searchTimer = 0;
+
+      function measuredCardRows() {
+        return Number(getComputedStyle(grid).getPropertyValue("--card-rows")) || 2;
+      }
+
+      function placeCard(card, index) {
+        card.style.gridColumn = String(Math.floor(index / cardRows) + 1);
+        card.style.gridRow = String(index % cardRows + 1);
+      }
 
       function measuredColumnWidth() {
         var track = getComputedStyle(grid).gridAutoColumns;
@@ -2642,14 +2658,21 @@
       function updateWindow() {
         listFrame = 0;
         if (!listRows.length || !document.body.classList.contains("view-catalog") || !grid.clientWidth) return;
-        var columns = Math.ceil(listRows.length / 2);
+        var nextRows = measuredCardRows();
         var width = measuredColumnWidth();
-        if (width !== columnWidth || !grid.style.gridTemplateColumns) {
+        var rowLayoutChanged = nextRows !== cardRows;
+        if (rowLayoutChanged || width !== columnWidth || !grid.style.gridTemplateColumns) {
+          var anchor = Math.floor(grid.scrollLeft / columnWidth) * cardRows;
+          cardRows = nextRows;
           columnWidth = width;
-          grid.style.gridTemplateColumns = "repeat(" + columns + ", " + width + "px)";
+          grid.style.gridTemplateColumns = "repeat(" + Math.ceil(listRows.length / cardRows) + ", " + width + "px)";
+          if (rowLayoutChanged) {
+            mounted.forEach(placeCard);
+            grid.scrollLeft = Math.floor(anchor / cardRows) * width;
+          }
         }
-        var first = Math.max(0, Math.floor(grid.scrollLeft / width) - 2) * 2;
-        var end = Math.min(listRows.length, (Math.ceil((grid.scrollLeft + grid.clientWidth) / width) + 2) * 2);
+        var first = Math.max(0, Math.floor(grid.scrollLeft / width) - 2) * cardRows;
+        var end = Math.min(listRows.length, (Math.ceil((grid.scrollLeft + grid.clientWidth) / width) + 2) * cardRows);
         mounted.forEach(function (card, index) {
           if ((index < first || index >= end) && !card.contains(document.activeElement)) {
             rememberCard(card);
@@ -2660,8 +2683,7 @@
         for (var i = first; i < end; i++) {
           if (mounted.has(i)) continue;
           var row = listRows[i], card = renderCard(row, i + 1);
-          card.style.gridColumn = String(Math.floor(i / 2) + 1);
-          card.style.gridRow = String(i % 2 + 1);
+          placeCard(card, i);
           var next = Array.from(grid.children).find(function (n) { return Number(n.dataset.pos) > i + 1; });
           grid.insertBefore(card, next || null);
           mounted.set(i, card);
@@ -2701,7 +2723,7 @@
         var index = Number(card.dataset.pos) - 1 + (ev.shiftKey ? -1 : 1);
         if (index < 0 || index >= listRows.length) return;
         ev.preventDefault();
-        grid.scrollLeft = Math.floor(index / 2) * columnWidth;
+        grid.scrollLeft = Math.floor(index / cardRows) * columnWidth;
         updateWindow();
         var nextControls = cardControls(mounted.get(index));
         nextControls[ev.shiftKey ? nextControls.length - 1 : 0].focus({ preventScroll: true });
@@ -2723,10 +2745,11 @@
         } else {
           var spacer = el("div", "virtual-spacer");
           spacer.setAttribute("aria-hidden", "true");
-          spacer.style.cssText = "grid-column:1 / -1;grid-row:1 / 3;pointer-events:none;visibility:hidden;min-width:0";
+          spacer.style.cssText = "grid-column:1 / -1;grid-row:1 / -1;pointer-events:none;visibility:hidden;min-width:0";
           grid.appendChild(spacer);
           columnWidth = measuredColumnWidth();
-          grid.style.gridTemplateColumns = "repeat(" + Math.ceil(listRows.length / 2) + ", " + columnWidth + "px)";
+          cardRows = measuredCardRows();
+          grid.style.gridTemplateColumns = "repeat(" + Math.ceil(listRows.length / cardRows) + ", " + columnWidth + "px)";
         }
         grid.scrollLeft = keepScroll ? prev : 0;
         updateWindow();
