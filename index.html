@@ -1271,9 +1271,10 @@
 
     /* Full HD workspace: keep a 1920 × 1080 canvas centered on larger displays. */
     @media (min-width: 900px) {
-      body.view-home, body.view-catalog { display:flex; align-items:center; justify-content:center; height:100dvh; min-height:0; }
-      .frame { flex:0 1 1920px; width:min(1920px, 100%); min-width:0; margin:0; padding-inline:clamp(28px, 3.333vw, 64px); }
-      .view-home .frame, .view-catalog .frame { height:min(100dvh, 1080px); min-height:0; }
+      body.view-home, body.view-catalog { display:block; height:100dvh; min-height:0; }
+      .frame { width:min(1920px, 100%); min-width:0; padding-inline:clamp(28px, 3.333vw, 64px); }
+      /* Anchor the workspace independently of body layout and dynamic overlays. */
+      .view-home .frame, .view-catalog .frame { position:fixed; inset:0; margin:auto; height:min(100dvh, 1080px); min-height:0; }
       /* Center the visible introduction and tiles as one balanced group. */
       .view-home .home-stage { width:100%; max-width:1440px; margin-inline:auto; height:100%; min-height:0; align-items:safe center; }
       .view-home .home-left { width:min(100%, 42rem); height:auto; justify-self:center; justify-content:center; }
