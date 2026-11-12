@@ -1374,10 +1374,27 @@
     .review-dialog-head button { flex: 0 0 auto; min-height: 36px; padding: 5px 12px; }
     .review-dialog-criteria { margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--slate); font-size: .82rem; line-height: 1.5; }
 
+    .frame { position: relative; }
+    .language-switch {
+      position: absolute; inset-block-start: 8px; inset-inline-end: 16px; z-index: 10;
+      display: flex; border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: var(--paper);
+    }
+    .language-switch button { padding: 5px 9px; min-height: 30px; color: var(--ink); cursor: pointer; font: 600 .75rem var(--mono); }
+    .language-switch button[aria-pressed=true] { color: var(--paper); background: var(--ink); }
+    .language-switch button:focus-visible { outline: 2px solid var(--ledger); outline-offset: 2px; }
+    .mast-top { padding-inline-end: 88px; }
+    @media (min-width: 900px) { .language-switch { inset-inline-end: clamp(28px, 3.333vw, 64px); } }
+    html[lang=en] .card-category .cat { font-size: .76rem; }
+    html[lang=en] .review-chart .axis-label { font-size: 11px; }
   </style>
 </head>
 <body class="view-home">
   <div class="frame">
+    <div class="language-switch" role="group" aria-label="언어">
+      <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+      <button type="button" data-lang="ko" lang="ko" aria-label="한국어" aria-pressed="true">KOR</button>
+    </div>
     <header class="mast">
       <div class="mast-top">
         <a href="https://github.com/emmabostian/developer-portfolios" target="_blank" rel="noopener noreferrer">emmabostian/developer-portfolios</a>
@@ -1713,6 +1730,217 @@
     (function () {
       "use strict";
 
+      var translations = {
+        "언어": "Language",
+        "메인으로": "Back to home",
+        "1000곳": "1,000 sites",
+        "곳": " sites",
+        "사이트를 직접 방문해 평가한 주관적 별점": "Personal ratings from visiting each portfolio",
+        "각 사이트를 방문해 확인한 내용을 평가했습니다. 본문이나 링크를 확인하기 어려운 곳은 별점을 보류했습니다.": "I visited each site and rated what I could review. Sites with inaccessible links or content are unrated.",
+        "콘셉트, 내용, 실적을 같은 규칙으로 매겼습니다.": "I applied the same criteria to each portfolio's concept, content, and track record.",
+        "콘셉트와 사용성, 프로젝트 설명의 구체성, 경력·출시 작업을 뒷받침하는 근거를 함께 살펴봤습니다.": "I looked at concept and usability, the detail in project write-ups, and evidence of work experience and shipped projects.",
+        "주관적 별점이며, 절대적인 순위가 아닙니다.": "The ratings reflect my own assessment of each portfolio.",
+        "전체 목록 보기": "Browse all portfolios",
+        "큰분류": "Categories",
+        "큰분류로 목록 열기": "Browse portfolios by category",
+        "소분류": "Subcategories",
+        "분류": "Categories",
+        "분야별로 찾아보기": "Browse by category",
+        "분야 목록으로 돌아가기": "Back to categories",
+        "← 뒤로": "← Back",
+        "전체": "All",
+        "즐겨찾기만": "Favorites only",
+        "즐겨찾기": "Favorite",
+        "검색": "Search",
+        "이름, 직함, 설명, 평가, 코멘트에서 찾기": "Search names, roles, reviews, and comments",
+        "정렬": "Sort",
+        "별점 높은 순": "Highest rated",
+        "별점 낮은 순": "Lowest rated",
+        "목록 순": "List order",
+        "이름 순": "Name",
+        "최소 별점": "Minimum rating",
+        "제한 없음": "Any rating",
+        "2점 이상": "2 stars or more",
+        "2.5점 이상": "2.5 stars or more",
+        "3점 이상": "3 stars or more",
+        "3.5점 이상": "3.5 stars or more",
+        "4점 이상": "4 stars or more",
+        "4.5점 이상": "4.5 stars or more",
+        "5점만": "5 stars only",
+        "별점 기준": "Rating guide",
+        "살펴본 점:": "What I looked at:",
+        "사이트의 콘셉트와 사용성, 프로젝트 설명의 구체성, 경력과 작업을 뒷받침하는 실적을 함께 살펴봤습니다. 별점은 포트폴리오를 방문했을 때의 주관적 평가이며 개발자의 절대적인 실력 순위가 아닙니다.": "I considered the site's concept, usability, project detail, and evidence of past work. Ratings reflect my impression of the portfolio at the time of review.",
+        "육각형:": "Hexagon:",
+        "기존 설명과 평가에서 기준에 해당하는 표현을 찾아 표시합니다. 채운 점은 평가, 빈 파란 점은 설명, 작은 회색 점은 언급이 없음을 뜻합니다.": "Filled dots mark criteria mentioned in the review, hollow blue dots mark criteria in the description, and small gray dots indicate no mention.",
+        "5점:": "5 stars:",
+        "콘셉트와 구성, 프로젝트 설명과 실적이 모두 뛰어나고 일관됩니다. 목록에서 특히 참고할 만한 수준입니다.": "A strong concept, clear structure, detailed projects, and a consistent track record.",
+        "4~4.5점:": "4–4.5 stars:",
+        "실무 경력이나 실제 출시 제품을 구체적으로 보여주며, 구성이나 콘셉트에도 뚜렷한 강점이 있습니다.": "Detailed professional work or shipped products, with a strong concept or structure.",
+        "3~3.5점:": "3–3.5 stars:",
+        "필요한 내용을 성실하게 담았지만, 템플릿의 인상이 강하거나 대표 작업의 과정과 설명이 다소 얕습니다.": "Covers the essentials, with a familiar layout or limited detail on featured work.",
+        "2~2.5점:": "2–2.5 stars:",
+        "학습·과제 수준의 작업이나 일반적인 소개 문구가 주를 이루고, 완성도 또는 주장을 뒷받침하는 근거가 부족합니다.": "Mostly coursework or general introductions, with limited detail or supporting evidence.",
+        "1~1.5점:": "1–1.5 stars:",
+        "방문 당시 접속이 어렵거나 페이지가 깨져 있거나, 평가할 수 있는 내용이 거의 없습니다.": "The site was hard to access, broken, or offered very little to review at the time.",
+        "평가는 방문 시점의 화면을 바탕으로 했으므로 현재 사이트와 다를 수 있습니다. 즐겨찾기와 코멘트는 이 브라우저에만 저장됩니다.": "Sites may have changed since the review. Favorites and comments are stored in this browser.",
+        "사이트 목록": "Portfolio list",
+        "큰분류 접기": "Collapse categories",
+        "큰분류 더 보기": "Show more categories",
+        "접기": "Collapse",
+        "모든 분류": "All categories",
+        "평가 보류": "Unrated",
+        "전문성": "Expertise",
+        "창의성": "Creativity",
+        "사용성": "Usability",
+        "구현": "Implementation",
+        "경력·기여": "Experience",
+        "실적·근거": "Evidence",
+        "평가에 언급": "In the review",
+        "설명에 언급": "In the description",
+        "기록에 언급 없음": "Not mentioned",
+        "직종 태그": "Role tags",
+        "설명": "Description",
+        "확인 상태": "Review status",
+        "평가": "Review",
+        "기록에 나온 기준": "Criteria mentioned",
+        "설명·평가 보기 ↗": "View review ↗",
+        "코멘트": "Comment",
+        "코멘트 수정": "Edit comment",
+        "Enter 저장 · Shift+Enter 줄바꿈": "Enter to save · Shift+Enter for a new line",
+        "저장": "Save",
+        "지우기": "Clear",
+        "닫기": "Close",
+        "즐겨찾기 해제": "Remove from favorites",
+        "즐겨찾기에 추가": "Add to favorites",
+        "즐겨찾기 됨": "Favorited",
+        "아직 즐겨찾기한 포트폴리오가 없습니다.": "No favorites yet.",
+        "조건에 맞는 포트폴리오가 없습니다.": "No portfolios match these filters.",
+        "디자인·크리에이티브": "Design & Creative",
+        "데이터": "Data",
+        "게임": "Games",
+        "소프트웨어": "Software",
+        "풀스택·웹": "Full Stack & Web",
+        "프론트엔드": "Frontend",
+        "모바일": "Mobile",
+        "보안": "Security",
+        "백엔드": "Backend",
+        "데브옵스·클라우드": "DevOps & Cloud",
+        "기타": "Other",
+        "LLM·에이전트·생성형 AI": "LLMs, Agents & Generative AI",
+        "AI 자동화(n8n·RPA 등)": "AI Automation (n8n, RPA, etc.)",
+        "ML·딥러닝·컴퓨터비전": "ML, Deep Learning & Vision",
+        "데이터 사이언스·데이터 엔지니어링": "Data Science & Engineering",
+        "AI 엔지니어": "AI Engineering",
+        "AI 겸업 (풀스택·로보틱스 등)": "AI + Full Stack, Robotics, etc.",
+        "크리에이티브 개발자": "Creative Developer",
+        "웹 디자인": "Web Design",
+        "디자인 엔지니어": "Design Engineer",
+        "UI/UX 디자인": "UI/UX Design",
+        "프로덕트 디자인": "Product Design",
+        "그래픽 디자인": "Graphic Design",
+        "크리에이티브 테크놀로지스트": "Creative Technologist",
+        "데이터 엔지니어": "Data Engineer",
+        "데이터 분석가": "Data Analyst",
+        "데이터 사이언티스트": "Data Scientist",
+        "데이터 엔지니어·분석": "Data Engineering & Analysis",
+        "게임 개발": "Game Development",
+        "게임+웹·앱": "Games + Web & Apps",
+        "소프트웨어 엔지니어": "Software Engineer",
+        "소프트웨어 개발자": "Software Developer",
+        "학생·인턴": "Student & Intern",
+        "시니어·리드": "Senior & Lead",
+        "아키텍트": "Architect",
+        "프론트엔드 개발자": "Frontend Developer",
+        "프론트엔드 엔지니어": "Frontend Engineer",
+        "프론트 중심 풀스택": "Frontend-Focused Full Stack",
+        "프론트 중심 풀스택(시니어)": "Senior Frontend-Focused Full Stack",
+        "프론트엔드+크리에이티브": "Frontend + Creative",
+        "프론트엔드+UI/UX": "Frontend + UI/UX",
+        "스태프·프린시펄": "Staff & Principal",
+        "모바일 개발": "Mobile Development",
+        "크로스플랫폼": "Cross-Platform",
+        "보안 연구자": "Security Researcher",
+        "디벨로퍼 애드보킷": "Developer Advocate",
+        "학생": "Student",
+        "분산 시스템": "Distributed Systems",
+        "백엔드 엔지니어": "Backend Engineer",
+        "백엔드 개발자": "Backend Developer",
+        "학생·지망": "Student & Aspiring",
+        "클라우드 아키텍트": "Cloud Architect",
+        "클라우드 엔지니어": "Cloud Engineer",
+        "DevOps 엔지니어": "DevOps Engineer",
+        "창업·리더": "Founders & Leaders",
+        "프로덕트·PM": "Product & PM",
+        "세일즈포스·CRM": "Salesforce & CRM",
+        "ERP·비즈니스 시스템": "ERP & Business Systems",
+        "워드프레스·CMS": "WordPress & CMS",
+        "임베디드·하드웨어": "Embedded & Hardware",
+        "시스템·인프라": "Systems & Infrastructure",
+        "특화 개발": "Specialized Development",
+        "사진·마케팅": "Photography & Marketing",
+        "풀스택 개발자": "Full Stack Developer",
+        "일반 풀스택·웹": "General Full Stack & Web",
+        "웹 개발자": "Web Developer",
+        "웹 개발·에이전시": "Web Development & Agencies",
+        "디자인·UI/UX 겸업": "Development + UI/UX",
+        "클라우드·DevOps 겸업": "Development + Cloud & DevOps",
+        "리드·시니어·아키텍트": "Lead, Senior & Architect",
+        "학생·초기 경력": "Student & Early Career",
+        "디자인·UI/UX·3D": "Design, UI/UX & 3D",
+        "모바일·앱·게임": "Mobile, Apps & Games",
+        "AI·데이터·자동화": "AI, Data & Automation",
+        "CMS·커머스·웹빌더": "CMS, Commerce & Site Builders",
+        "클라우드·DevOps·시스템": "Cloud, DevOps & Systems",
+        "보안·암호화": "Security & Cryptography",
+        "블록체인·Web3": "Blockchain & Web3",
+        "임베디드·IoT": "Embedded & IoT",
+        "프리랜서·창업·기획": "Freelance, Startups & Planning",
+        "콘텐츠·오픈소스·연구": "Content, Open Source & Research",
+        "확인 필요": "Needs Review"
+      };
+      var languageKey = "devpolist-language";
+      var language = "ko";
+      try { if (localStorage.getItem(languageKey) === "en") language = "en"; } catch (_) {}
+      function t(korean) {
+        return language === "en" && Object.hasOwn(translations, korean) ? translations[korean] : korean;
+      }
+      var languageSwitch = document.querySelector(".language-switch");
+      var staticCopy = [];
+      var staticWalker = document.createTreeWalker(document.querySelector(".frame"), NodeFilter.SHOW_TEXT);
+      for (var node = staticWalker.nextNode(); node; node = staticWalker.nextNode()) {
+        var original = node.nodeValue.trim();
+        if (Object.hasOwn(translations, original)) staticCopy.push({ node:node, value:original, raw:node.nodeValue });
+      }
+      document.querySelectorAll(".frame [aria-label], .frame [title], .frame [placeholder]").forEach(function (element) {
+        ["aria-label", "title", "placeholder"].forEach(function (attribute) {
+          var original = element.getAttribute(attribute);
+          if (Object.hasOwn(translations, original)) staticCopy.push({ node:element, attribute:attribute, value:original });
+        });
+      });
+      function applyLanguage() {
+        document.documentElement.lang = language;
+        staticCopy.forEach(function (entry) {
+          if (entry.attribute) entry.node.setAttribute(entry.attribute, t(entry.value));
+          else entry.node.nodeValue = entry.raw.replace(entry.value, t(entry.value));
+        });
+        languageSwitch.querySelectorAll("button").forEach(function (button) {
+          button.setAttribute("aria-pressed", String(button.dataset.lang === language));
+        });
+        reviewClose.textContent = t("닫기");
+        updateFavOnly();
+        renderHomeIndex();
+        renderDeck();
+        if (document.body.classList.contains("view-catalog")) renderList(true);
+      }
+      languageSwitch.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-lang]");
+        if (!button || button.dataset.lang === language) return;
+        language = button.dataset.lang;
+        try { localStorage.setItem(languageKey, language); } catch (_) {}
+        applyLanguage();
+      });
+
+
       var MAJOR_ORDER = ["AI","디자인·크리에이티브","데이터","게임","소프트웨어","풀스택·웹","프론트엔드","모바일","보안","백엔드","데브옵스·클라우드","기타"];
       var TAXONOMY = JSON.parse(document.getElementById("taxonomy-data").textContent);
       var STAR_PATH = "M12 2.2l2.62 5.55 6.08.82-4.45 4.22 1.12 6.04L12 16.9l-5.37 2.93 1.12-6.04L3.3 8.57l6.08-.82L12 2.2z";
@@ -1791,11 +2019,11 @@
       }
 
       function starRow(score) {
-        if (score === null) return el("span", "star-num", "평가 보류");
+        if (score === null) return el("span", "star-num", t("평가 보류"));
         var wrap = document.createElement("span");
         wrap.className = "stars";
         wrap.setAttribute("role", "img");
-        wrap.setAttribute("aria-label", "별점 " + formatStar(score) + "점");
+        wrap.setAttribute("aria-label", language === "en" ? formatStar(score) + " stars" : "별점 " + formatStar(score) + "점");
         for (var i = 1; i <= 5; i++) {
           wrap.appendChild(starIcon(Math.max(0, Math.min(1, Number(score) - (i - 1)))));
         }
@@ -2062,7 +2290,7 @@
       function deckCard(className, label, n) {
         var b = el("button", "deck-card " + className);
         b.type = "button";
-        b.appendChild(el("span", "name", label));
+        b.appendChild(el("span", "name", t(label)));
         b.appendChild(el("span", "n", String(n)));
         return b;
       }
@@ -2099,7 +2327,7 @@
             b.type = "button";
             b.setAttribute("data-sub", label);
             b.setAttribute("aria-pressed", label === state.sub ? "true" : "false");
-            b.appendChild(el("span", "name", label));
+            b.appendChild(el("span", "name", t(label)));
             b.appendChild(el("span", "n", String(sc[label] || 0)));
             b.addEventListener("click", function () { onSub(label); });
             subRoot.appendChild(b);
@@ -2112,8 +2340,8 @@
         }
         var expanded = state.deck === "majors";
         andMore.setAttribute("aria-expanded", expanded ? "true" : "false");
-        andMore.setAttribute("aria-label", expanded ? "큰분류 접기" : "큰분류 더 보기");
-        andMore.querySelector(".and-more-label").textContent = expanded ? "접기" : "AND MORE";
+        andMore.setAttribute("aria-label", t(expanded ? "큰분류 접기" : "큰분류 더 보기"));
+        andMore.querySelector(".and-more-label").textContent = expanded ? t("접기") : "AND MORE";
         updateBars();
       }
 
@@ -2237,7 +2465,7 @@
         favTile.type = "button";
         favTile.setAttribute("data-major", "즐겨찾기");
         favTile.appendChild(el("span", "n", String(favCount())));
-        favTile.appendChild(el("span", "label", "즐겨찾기"));
+        favTile.appendChild(el("span", "label", language === "en" ? "Favorites" : "즐겨찾기"));
         favTile.addEventListener("click", function () { openCatalog("전체", "collapsed", true); });
         root.appendChild(favTile);
 
@@ -2246,7 +2474,7 @@
           btn.type = "button";
           btn.setAttribute("data-major", label);
           btn.appendChild(el("span", "n", String(counts[label] || 0)));
-          btn.appendChild(el("span", "label", label));
+          btn.appendChild(el("span", "label", t(label)));
           btn.addEventListener("click", function () { openCatalog(label, "subs", false); });
           root.appendChild(btn);
         });
@@ -2256,7 +2484,7 @@
         var btn = document.getElementById("fav-only");
         var n = favCount();
         btn.setAttribute("aria-pressed", state.favOnly ? "true" : "false");
-        btn.textContent = n ? "즐겨찾기만 " + n : "즐겨찾기만";
+        btn.textContent = t("즐겨찾기만") + (n ? " " + n : "");
       }
 
       function normalize(s) {
@@ -2367,16 +2595,20 @@
         var body = el("div", "body-block");
         if (row.tag) {
           var tag = el("p", "review-tag");
-          tag.appendChild(el("span", "k", "직종 태그"));
+          tag.appendChild(el("span", "k", t("직종 태그")));
           tag.appendChild(document.createTextNode(row.tag));
           body.appendChild(tag);
         }
         var description = el("p", "desc");
-        description.appendChild(el("span", "k", "설명"));
-        description.appendChild(document.createTextNode(row.d));
+        description.appendChild(el("span", "k", t("설명")));
+        var descriptionText = el("span", null, row.d);
+        descriptionText.lang = "ko";
+        description.appendChild(descriptionText);
         var evaluation = el("p", "eval");
-        evaluation.appendChild(el("span", "k", row.s === null ? "확인 상태" : "평가"));
-        evaluation.appendChild(document.createTextNode(row.e));
+        evaluation.appendChild(el("span", "k", t(row.s === null ? "확인 상태" : "평가")));
+        var evaluationText = el("span", null, row.e);
+        evaluationText.lang = "ko";
+        evaluation.appendChild(evaluationText);
         body.append(description, evaluation);
         return body;
       }
@@ -2390,7 +2622,7 @@
         var button = el("button", "review-chart");
         button.type = "button";
         button.setAttribute("aria-haspopup", "dialog");
-        button.setAttribute("aria-label", row.name + " 설명과 평가 보기");
+        button.setAttribute("aria-label", language === "en" ? "View review for " + row.name : row.name + " 설명과 평가 보기");
         var chart = svgEl("svg", { viewBox:"0 0 256 136", "aria-hidden":"true", focusable:"false" });
         [43, 29, 15].forEach(function (radius, index) {
           var points = reviewAxes.map(function (_, i) {
@@ -2405,12 +2637,12 @@
           chart.appendChild(svgEl("line", { x1:128, y1:68, x2:point.x, y2:point.y, class:"spoke" }));
           chart.appendChild(svgEl("circle", { cx:point.x, cy:point.y, r:state === "unmentioned" ? 2.2 : 3.6, class:"marker marker-" + state }));
           var label = svgEl("text", { x:axis.x, y:axis.y, "text-anchor":axis.anchor, class:"axis-label label-" + state });
-          label.textContent = axis.label;
+          label.textContent = t(axis.label);
           chart.appendChild(label);
         });
         var caption = el("span", "review-chart-caption");
-        caption.appendChild(el("span", "legend", row.s === null ? "평가 보류" : "기록에 나온 기준"));
-        caption.appendChild(document.createTextNode("설명·평가 보기 ↗"));
+        caption.appendChild(el("span", "legend", t(row.s === null ? "평가 보류" : "기록에 나온 기준")));
+        caption.appendChild(document.createTextNode(t("설명·평가 보기 ↗")));
         button.append(chart, caption);
         button.addEventListener("click", function () { showReviewDialog(row); });
         return button;
@@ -2448,7 +2680,7 @@
       var reviewDialogHead = el("div", "review-dialog-head");
       var reviewDialogTitle = el("h2", "review-title");
       reviewDialogTitle.id = "review-dialog-title";
-      var reviewClose = el("button", "tool-btn", "닫기");
+      var reviewClose = el("button", "tool-btn", t("닫기"));
       reviewClose.type = "button";
       reviewClose.autofocus = true;
       reviewClose.addEventListener("click", function () { reviewDialog.close(); });
@@ -2461,8 +2693,8 @@
         hideReviewPreview();
         hideCommentTip();
         reviewDialogTitle.textContent = row.name;
-        var summary = row.s === null ? "평가 보류" : reviewAxes.map(function (axis) {
-          return axis.label + " · " + reviewStates[reviewAxisState(row, axis)];
+        var summary = row.s === null ? t("평가 보류") : reviewAxes.map(function (axis) {
+          return t(axis.label) + " · " + t(reviewStates[reviewAxisState(row, axis)]);
         }).join(" / ");
         reviewDialogContent.replaceChildren(reviewBody(row), el("p", "review-dialog-criteria", summary));
         reviewDialog.scrollTop = 0;
@@ -2496,7 +2728,7 @@
         link.href = row.url;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.setAttribute("aria-label", row.name + " 사이트 열기 (새 탭)");
+        link.setAttribute("aria-label", language === "en" ? "Open " + row.name + " in a new tab" : row.name + " 사이트 열기 (새 탭)");
         var icon = svgEl("svg", { viewBox:"0 0 24 24", width:16, height:16, fill:"none",
           stroke:"currentColor", "stroke-width":1.7, "stroke-linecap":"round",
           "stroke-linejoin":"round", "aria-hidden":"true", focusable:"false" });
@@ -2509,7 +2741,7 @@
         var category = el("div", "card-category");
         var separator = el("span", "category-separator", "/");
         separator.setAttribute("aria-hidden", "true");
-        category.append(el("span", "cat cat-major", row.major), separator, el("span", "cat cat-sub", row.sub));
+        category.append(el("span", "cat cat-major", t(row.major)), separator, el("span", "cat cat-sub", t(row.sub)));
         top.append(title, rating, category);
         card.appendChild(top);
 
@@ -2518,7 +2750,7 @@
 
         var existing = getComment(row.i);
         var noteEl = el("p", "user-note");
-        noteEl.appendChild(el("span", "k", "코멘트"));
+        noteEl.appendChild(el("span", "k", t("코멘트")));
         noteEl.appendChild(document.createTextNode(existing));
         if (!existing) noteEl.hidden = true;
         scroll.appendChild(noteEl);
@@ -2528,16 +2760,16 @@
         var ta = document.createElement("textarea");
         ta.setAttribute("maxlength", "2000");
         ta.setAttribute("rows", "3");
-        ta.setAttribute("aria-label", "코멘트");
+        ta.setAttribute("aria-label", t("코멘트"));
         ta.value = existing;
         panel.appendChild(ta);
-        panel.appendChild(el("p", "comment-hint", "Enter 저장 · Shift+Enter 줄바꿈"));
+        panel.appendChild(el("p", "comment-hint", t("Enter 저장 · Shift+Enter 줄바꿈")));
         var actions = el("div", "comment-actions");
-        var saveBtn = el("button", "tool-btn comment-save", "저장");
+        var saveBtn = el("button", "tool-btn comment-save", t("저장"));
         saveBtn.type = "button";
-        var clearBtn = el("button", "tool-btn comment-clear", "지우기");
+        var clearBtn = el("button", "tool-btn comment-clear", t("지우기"));
         clearBtn.type = "button";
-        var cancelBtn = el("button", "tool-btn comment-cancel", "닫기");
+        var cancelBtn = el("button", "tool-btn comment-cancel", t("닫기"));
         cancelBtn.type = "button";
         actions.appendChild(saveBtn);
         actions.appendChild(clearBtn);
@@ -2553,8 +2785,8 @@
           var now = isFav(row.i);
           card.setAttribute("data-fav", now ? "1" : "0");
           favBtn.setAttribute("aria-pressed", now ? "true" : "false");
-          favBtn.setAttribute("aria-label", now ? "즐겨찾기 해제" : "즐겨찾기에 추가");
-          favBtn.textContent = now ? "즐겨찾기 됨" : "즐겨찾기";
+          favBtn.setAttribute("aria-label", t(now ? "즐겨찾기 해제" : "즐겨찾기에 추가"));
+          favBtn.textContent = t(now ? "즐겨찾기 됨" : "즐겨찾기");
         }
         paintFav();
         favBtn.addEventListener("click", function () {
@@ -2570,7 +2802,7 @@
           paintFav();
         });
         tools.appendChild(favBtn);
-        var commentBtn = el("button", "tool-btn comment-btn", existing ? "코멘트 수정" : "코멘트");
+        var commentBtn = el("button", "tool-btn comment-btn", t(existing ? "코멘트 수정" : "코멘트"));
         commentBtn.type = "button";
         tools.appendChild(commentBtn);
         card.appendChild(tools);
@@ -2602,10 +2834,10 @@
         function refreshNote() {
           var text = getComment(row.i);
           noteEl.textContent = "";
-          noteEl.appendChild(el("span", "k", "코멘트"));
+          noteEl.appendChild(el("span", "k", t("코멘트")));
           noteEl.appendChild(document.createTextNode(text));
           noteEl.hidden = !text;
-          commentBtn.textContent = text ? "코멘트 수정" : "코멘트";
+          commentBtn.textContent = t(text ? "코멘트 수정" : "코멘트");
           ta.value = text;
         }
 
@@ -2649,15 +2881,15 @@
         var count = document.getElementById("count");
         count.textContent = "";
         count.appendChild(el("strong", null, String(n)));
-        count.appendChild(document.createTextNode("곳"));
-        count.appendChild(el("span", "of", "전체 " + DATA.length + "곳 중"));
+        count.appendChild(document.createTextNode(language === "en" && n === 1 ? " site" : t("곳")));
+        count.appendChild(el("span", "of", language === "en" ? " of " + DATA.length : "전체 " + DATA.length + "곳 중"));
 
         var parts = [];
-        if (state.favOnly) parts.push("즐겨찾기만");
-        parts.push(state.major === "전체" ? "모든 분류" : state.major);
-        if (state.major !== "전체" && state.sub !== "전체") parts.push(state.sub);
-        if (Number(state.min) > 0) parts.push(formatStar(state.min) + "점 이상");
-        if (normalize(state.q)) parts.push("검색 “" + String(state.q).trim() + "”");
+        if (state.favOnly) parts.push(t("즐겨찾기만"));
+        parts.push(t(state.major === "전체" ? "모든 분류" : state.major));
+        if (state.major !== "전체" && state.sub !== "전체") parts.push(t(state.sub));
+        if (Number(state.min) > 0) parts.push(t(Number(state.min) === 5 ? "5점만" : formatStar(state.min) + "점 이상"));
+        if (normalize(state.q)) parts.push(t("검색") + " “" + String(state.q).trim() + "”");
         var scope = document.getElementById("scope");
         scope.textContent = parts.join(" · ");
         scope.title = scope.textContent;
@@ -2778,7 +3010,7 @@
         grid.style.gridTemplateColumns = "";
         renderStatus(listRows.length);
         if (!listRows.length) {
-          grid.appendChild(el("div", "empty", state.favOnly && !favCount() ? "아직 즐겨찾기한 포트폴리오가 없습니다." : "조건에 맞는 포트폴리오가 없습니다."));
+          grid.appendChild(el("div", "empty", t(state.favOnly && !favCount() ? "아직 즐겨찾기한 포트폴리오가 없습니다." : "조건에 맞는 포트폴리오가 없습니다.")));
         } else {
           var spacer = el("div", "virtual-spacer");
           spacer.setAttribute("aria-hidden", "true");
@@ -2848,9 +3080,7 @@
       attachBar(grid);
 
       loadNotes();
-      updateFavOnly();
-      renderHomeIndex();
-      renderDeck();
+      applyLanguage();
       updateScrollBar();
     })();
   </script>
